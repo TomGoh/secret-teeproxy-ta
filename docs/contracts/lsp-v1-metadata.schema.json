@@ -1,0 +1,2971 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:lsp:metadata:v1:draft",
+  "title": "LSP/1 closed metadata contract (validation envelope is not wire JSON)",
+  "description": "The decoder supplies direction/opcode/status/request_bound from validated header and local session state. Only metadata is serialized on the wire. Capacity-only GP replies have no LSP metadata and are checked separately.",
+  "$ref": "#/$defs/validationEnvelope",
+  "$defs": {
+    "u64": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20,
+      "pattern": "^(?:0|[1-9][0-9]{0,18}|1[0-7][0-9]{18}|18[0-3][0-9]{17}|184[0-3][0-9]{16}|1844[0-5][0-9]{15}|18446[0-6][0-9]{14}|184467[0-3][0-9]{13}|1844674[0-3][0-9]{12}|184467440[0-6][0-9]{10}|1844674407[0-2][0-9]{9}|18446744073[0-6][0-9]{8}|1844674407370[0-8][0-9]{6}|18446744073709[0-4][0-9]{5}|184467440737095[0-4][0-9]{4}|18446744073709550[0-9]{3}|18446744073709551[0-5][0-9]{2}|1844674407370955160[0-9]{1}|1844674407370955161[0-4]|18446744073709551615)$"
+    },
+    "u64Positive": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/u64"
+        },
+        {
+          "not": {
+            "const": "0"
+          }
+        }
+      ]
+    },
+    "hex128": {
+      "type": "string",
+      "minLength": 32,
+      "maxLength": 32,
+      "pattern": "^[0-9a-f]{32}$"
+    },
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9._-]+$"
+    },
+    "inputHeader": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/headerName"
+            },
+            {
+              "not": {
+                "pattern": "^(?:[Hh][Oo][Ss][Tt]|[Aa][Uu][Tt][Hh][Oo][Rr][Ii][Zz][Aa][Tt][Ii][Oo][Nn]|[Xx]\\-[Aa][Pp][Ii]\\-[Kk][Ee][Yy]|[Cc][Oo][Nn][Tt][Ee][Nn][Tt]\\-[Ll][Ee][Nn][Gg][Tt][Hh]|[Tt][Rr][Aa][Nn][Ss][Ff][Ee][Rr]\\-[Ee][Nn][Cc][Oo][Dd][Ii][Nn][Gg]|[Cc][Oo][Nn][Nn][Ee][Cc][Tt][Ii][Oo][Nn]|[Pp][Rr][Oo][Xx][Yy]\\-.*|[Xx]\\-[Gg][Oo][Oo][Gg]\\-[Aa][Pp][Ii]\\-[Kk][Ee][Yy]|[Aa][Nn][Tt][Hh][Rr][Oo][Pp][Ii][Cc]\\-[Vv][Ee][Rr][Ss][Ii][Oo][Nn])$"
+              }
+            }
+          ]
+        },
+        "value": {
+          "$ref": "#/$defs/noControls"
+        }
+      },
+      "required": [
+        "name",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "headerName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[!#$%&'*+\\-.^_`|~0-9A-Za-z]+$"
+    },
+    "noControls": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 4096,
+      "pattern": "^[^\\u0000\\r\\n]*$"
+    },
+    "backendHelloResult": {
+      "type": "object",
+      "properties": {
+        "selected_version": {
+          "type": "object",
+          "properties": {
+            "major": {
+              "const": 1
+            },
+            "minor": {
+              "const": 0
+            }
+          },
+          "required": [
+            "major",
+            "minor"
+          ],
+          "additionalProperties": false
+        },
+        "role": {
+          "enum": [
+            "request",
+            "management"
+          ]
+        },
+        "capabilities": {
+          "type": "object",
+          "properties": {
+            "operations": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/operation"
+              },
+              "maxItems": 6,
+              "uniqueItems": true
+            },
+            "profiles": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/profileCapability"
+              },
+              "maxItems": 16,
+              "uniqueItems": true
+            },
+            "backend_contract_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[\\x20-\\x7e]+$"
+            },
+            "features": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "bounded_pump",
+                  "business_cancel",
+                  "epoch_bound_sessions",
+                  "temporary_credentials",
+                  "provider_configuration",
+                  "concurrent_requests",
+                  "credential_rebind",
+                  "bulk_input_frames"
+                ]
+              },
+              "maxItems": 8,
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "operations",
+            "profiles",
+            "backend_contract_id",
+            "features"
+          ],
+          "additionalProperties": false
+        },
+        "limits": {
+          "$ref": "#/$defs/backendLimits"
+        }
+      },
+      "required": [
+        "selected_version",
+        "role",
+        "capabilities",
+        "limits"
+      ],
+      "additionalProperties": false
+    },
+    "operation": {
+      "type": "string",
+      "enum": [
+        "CHAT",
+        "RESPONSES",
+        "MESSAGES",
+        "GENERATE",
+        "OLLAMA_CHAT",
+        "MODELS"
+      ]
+    },
+    "profileCapability": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "auth_by_operation": {
+          "type": "object",
+          "properties": {
+            "CHAT": {
+              "type": "string",
+              "enum": [
+                "bearer",
+                "x_api_key"
+              ]
+            },
+            "RESPONSES": {
+              "type": "string",
+              "enum": [
+                "bearer",
+                "x_api_key"
+              ]
+            },
+            "MESSAGES": {
+              "type": "string",
+              "enum": [
+                "bearer",
+                "x_api_key"
+              ]
+            },
+            "MODELS": {
+              "type": "string",
+              "enum": [
+                "bearer",
+                "x_api_key"
+              ]
+            },
+            "GENERATE": {
+              "enum": [
+                "x_goog_api_key"
+              ]
+            },
+            "OLLAMA_CHAT": {
+              "enum": [
+                "bearer"
+              ]
+            }
+          },
+          "required": [],
+          "additionalProperties": false,
+          "minProperties": 1
+        },
+        "provider_types": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/providerType"
+          }
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": [
+            "auth_by_operation"
+          ]
+        },
+        {
+          "required": [
+            "provider_types"
+          ]
+        }
+      ]
+    },
+    "backendLimits": {
+      "type": "object",
+      "properties": {
+        "frame_input_max": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "frame_output_max": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "json_max": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "max_request_body": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "max_concurrent_requests": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "max_sessions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "max_pending_net_rx": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "max_pending_net_tx": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "max_pending_http_body": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "upload_idle_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "lease_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "heartbeat_max_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "max_overall_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "max_header_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "max_credential_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "max_temporary_ttl_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "max_body_reservation_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        }
+      },
+      "required": [
+        "frame_input_max",
+        "frame_output_max",
+        "json_max",
+        "max_request_body",
+        "max_concurrent_requests",
+        "max_sessions",
+        "max_pending_net_rx",
+        "max_pending_net_tx",
+        "max_pending_http_body",
+        "upload_idle_ms",
+        "lease_ms",
+        "heartbeat_max_ms",
+        "max_overall_ms",
+        "max_header_bytes",
+        "max_credential_bytes",
+        "max_temporary_ttl_ms"
+      ],
+      "additionalProperties": false
+    },
+    "credentialResult": {
+      "type": "object",
+      "properties": {
+        "credential_ref": {
+          "$ref": "#/$defs/hex128"
+        },
+        "namespace": {
+          "$ref": "#/$defs/identifier"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "absent",
+            "live",
+            "deleted",
+            "expired"
+          ]
+        },
+        "version": {
+          "$ref": "#/$defs/u64"
+        },
+        "profile_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/identifier"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "temporary": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "ttl_remaining_ms": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "receipt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/receipt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "replayed": {
+          "type": "boolean"
+        },
+        "provider_config": {
+          "$ref": "#/$defs/providerConfig"
+        }
+      },
+      "required": [
+        "credential_ref",
+        "namespace",
+        "state",
+        "version",
+        "profile_id",
+        "temporary",
+        "ttl_remaining_ms",
+        "receipt",
+        "replayed"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "absent"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "version": {
+                "const": "0"
+              },
+              "profile_id": {
+                "const": null
+              },
+              "temporary": {
+                "const": null
+              },
+              "ttl_remaining_ms": {
+                "const": null
+              },
+              "receipt": {
+                "const": null
+              },
+              "replayed": {
+                "const": false
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "profile_id": {
+                "$ref": "#/$defs/identifier"
+              },
+              "temporary": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "temporary": {
+                "const": false
+              }
+            },
+            "required": [
+              "temporary"
+            ]
+          },
+          "then": {
+            "properties": {
+              "ttl_remaining_ms": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "receipt": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "$ref": "#/$defs/hex128"
+        },
+        "operation": {
+          "type": "string",
+          "enum": [
+            "put",
+            "delete"
+          ]
+        },
+        "committed_version": {
+          "$ref": "#/$defs/u64"
+        }
+      },
+      "required": [
+        "operation_id",
+        "operation",
+        "committed_version"
+      ],
+      "additionalProperties": false
+    },
+    "taTerminal": {
+      "type": "object",
+      "properties": {
+        "end_reason": {
+          "type": "string",
+          "enum": [
+            "consumer_complete",
+            "response_consumed",
+            "cancelled",
+            "deadline",
+            "revoked",
+            "transport_error",
+            "internal_error"
+          ]
+        },
+        "http_framing": {
+          "type": "string",
+          "enum": [
+            "not_started",
+            "in_progress",
+            "complete",
+            "invalid"
+          ]
+        },
+        "tls_phase": {
+          "type": "string",
+          "enum": [
+            "not_started",
+            "handshake",
+            "application",
+            "closed",
+            "failed"
+          ]
+        },
+        "close_notify_received": {
+          "type": "boolean"
+        },
+        "request_application_bytes_generated": {
+          "$ref": "#/$defs/u64"
+        },
+        "emitted_http_body": {
+          "$ref": "#/$defs/u64"
+        },
+        "app_resources": {
+          "const": "released"
+        },
+        "manager_cleanup": {
+          "const": "not_asserted"
+        }
+      },
+      "required": [
+        "end_reason",
+        "http_framing",
+        "tls_phase",
+        "close_notify_received",
+        "request_application_bytes_generated",
+        "emitted_http_body",
+        "app_resources",
+        "manager_cleanup"
+      ],
+      "additionalProperties": false
+    },
+    "state": {
+      "enum": [
+        "NEW",
+        "HELLO_READY",
+        "UPLOADING",
+        "HANDSHAKING",
+        "EXCHANGING",
+        "HTTP_COMPLETE",
+        "ENDED",
+        "CANCELLED",
+        "EXPIRED",
+        "FAILED"
+      ]
+    },
+    "connectTarget": {
+      "type": "object",
+      "properties": {
+        "host": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9.:-]{1,253}$"
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "sni": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9.:-]{1,253}$"
+        },
+        "alpn": {
+          "const": "http/1.1"
+        }
+      },
+      "required": [
+        "host",
+        "port",
+        "sni",
+        "alpn"
+      ],
+      "additionalProperties": false
+    },
+    "event": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "event_seq": {
+              "$ref": "#/$defs/u64Positive"
+            },
+            "kind": {
+              "const": "NET_TX"
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "length": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4294967295
+            },
+            "stream_offset": {
+              "$ref": "#/$defs/u64"
+            },
+            "may_contain_request": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "event_seq",
+            "kind",
+            "offset",
+            "length",
+            "stream_offset",
+            "may_contain_request"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_seq": {
+              "$ref": "#/$defs/u64Positive"
+            },
+            "kind": {
+              "const": "HTTP_HEAD"
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "length": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4294967295
+            }
+          },
+          "required": [
+            "event_seq",
+            "kind",
+            "offset",
+            "length"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_seq": {
+              "$ref": "#/$defs/u64Positive"
+            },
+            "kind": {
+              "const": "HTTP_BODY"
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "length": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4294967295
+            },
+            "stream_offset": {
+              "$ref": "#/$defs/u64"
+            }
+          },
+          "required": [
+            "event_seq",
+            "kind",
+            "offset",
+            "length",
+            "stream_offset"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_seq": {
+              "$ref": "#/$defs/u64Positive"
+            },
+            "kind": {
+              "const": "HTTP_END"
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "length": {
+              "const": 0
+            },
+            "details": {
+              "type": "object",
+              "properties": {
+                "framing": {
+                  "const": "complete"
+                },
+                "body_bytes": {
+                  "$ref": "#/$defs/u64"
+                }
+              },
+              "required": [
+                "framing",
+                "body_bytes"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "event_seq",
+            "kind",
+            "offset",
+            "length",
+            "details"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "event_seq": {
+              "$ref": "#/$defs/u64Positive"
+            },
+            "kind": {
+              "const": "REQUEST_END"
+            },
+            "offset": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            "length": {
+              "const": 0
+            },
+            "details": {
+              "$ref": "#/$defs/taTerminal"
+            }
+          },
+          "required": [
+            "event_seq",
+            "kind",
+            "offset",
+            "length",
+            "details"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "progress": {
+      "type": "object",
+      "properties": {
+        "accepted_input_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "uploaded_body": {
+          "$ref": "#/$defs/u64"
+        },
+        "accepted_tls_rx": {
+          "$ref": "#/$defs/u64"
+        },
+        "emitted_tls_tx": {
+          "$ref": "#/$defs/u64"
+        },
+        "emitted_http_body": {
+          "$ref": "#/$defs/u64"
+        },
+        "rx_credit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "net_tx_pending": {
+          "type": "boolean"
+        },
+        "http_body_pending": {
+          "type": "boolean"
+        },
+        "need_step": {
+          "type": "boolean"
+        },
+        "poll_after_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/event"
+          },
+          "maxItems": 8
+        },
+        "terminal": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/taTerminal"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "connect_target": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/connectTarget"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "accepted_input_bytes",
+        "uploaded_body",
+        "accepted_tls_rx",
+        "emitted_tls_tx",
+        "emitted_http_body",
+        "rx_credit",
+        "net_tx_pending",
+        "http_body_pending",
+        "need_step",
+        "poll_after_ms",
+        "events",
+        "terminal",
+        "connect_target"
+      ],
+      "additionalProperties": false
+    },
+    "error": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "enum": [
+            "E_WIRE_FORMAT",
+            "E_VERSION",
+            "E_ROLE",
+            "E_STATE",
+            "E_STALE_EPOCH",
+            "E_SEQUENCE",
+            "E_REQUEST_ID",
+            "E_CREDENTIAL_NOT_FOUND",
+            "E_VERSION_CONFLICT",
+            "E_OPERATION_CONFLICT",
+            "E_PROFILE_DENIED",
+            "E_STORAGE",
+            "E_CREDENTIAL_REVOKED",
+            "E_STORAGE_NOT_COMMITTED",
+            "E_BUSY",
+            "E_LIMIT",
+            "E_BODY_LENGTH",
+            "E_BODY_OFFSET",
+            "E_BODY_DIGEST",
+            "E_TLS",
+            "E_HTTP_PARSE",
+            "E_NETWORK",
+            "E_DEADLINE",
+            "E_HTTP_LIMIT",
+            "E_INTERNAL"
+          ]
+        },
+        "stage": {
+          "enum": [
+            "wire",
+            "hello",
+            "credential",
+            "open",
+            "upload",
+            "tls_handshake",
+            "tls_io",
+            "http",
+            "network",
+            "finish",
+            "cancel",
+            "deadline",
+            "cleanup",
+            "internal",
+            "content_encoding"
+          ]
+        },
+        "retry": {
+          "enum": [
+            "none",
+            "resize_only",
+            "new_request_only",
+            "reconcile_management"
+          ]
+        }
+      },
+      "required": [
+        "code",
+        "stage",
+        "retry"
+      ],
+      "additionalProperties": false
+    },
+    "httpHeadPayload": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "integer",
+          "minimum": 200,
+          "maximum": 599
+        },
+        "headers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/responseHeader"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "headers"
+      ],
+      "additionalProperties": false
+    },
+    "responseHeader": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/headerName"
+        },
+        "value": {
+          "$ref": "#/$defs/noControls"
+        }
+      },
+      "required": [
+        "name",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "HELLORequest": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "enum": [
+            "request",
+            "management"
+          ]
+        },
+        "supported_versions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "properties": {
+              "major": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535
+              },
+              "minor": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 65535
+              }
+            },
+            "required": [
+              "major",
+              "minor"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "client_name": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "role",
+        "supported_versions"
+      ],
+      "additionalProperties": false
+    },
+    "CREDENTIAL_PUTRequest": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "$ref": "#/$defs/hex128"
+        },
+        "credential_ref": {
+          "$ref": "#/$defs/hex128"
+        },
+        "namespace": {
+          "$ref": "#/$defs/identifier"
+        },
+        "profile_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "expected_version": {
+          "$ref": "#/$defs/u64"
+        },
+        "temporary": {
+          "type": "boolean",
+          "default": false
+        },
+        "ttl_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967295
+        },
+        "ta_epoch": {
+          "$ref": "#/$defs/hex128"
+        },
+        "session_nonce": {
+          "$ref": "#/$defs/hex128"
+        },
+        "provider_config": {
+          "$ref": "#/$defs/providerConfig"
+        },
+        "reuse_existing_key": {
+          "type": "boolean",
+          "default": false,
+          "description": "With true, payload is empty and CAS reuses the live existing Key inside TA."
+        }
+      },
+      "required": [
+        "operation_id",
+        "credential_ref",
+        "namespace",
+        "profile_id",
+        "expected_version",
+        "ta_epoch",
+        "session_nonce"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "temporary"
+            ],
+            "properties": {
+              "temporary": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "ttl_ms"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "ttl_ms"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "CREDENTIAL_QUERYRequest": {
+      "type": "object",
+      "properties": {
+        "credential_ref": {
+          "$ref": "#/$defs/hex128"
+        },
+        "namespace": {
+          "$ref": "#/$defs/identifier"
+        },
+        "ta_epoch": {
+          "$ref": "#/$defs/hex128"
+        },
+        "session_nonce": {
+          "$ref": "#/$defs/hex128"
+        }
+      },
+      "required": [
+        "credential_ref",
+        "namespace",
+        "ta_epoch",
+        "session_nonce"
+      ],
+      "additionalProperties": false
+    },
+    "CREDENTIAL_DELETERequest": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "$ref": "#/$defs/hex128"
+        },
+        "credential_ref": {
+          "$ref": "#/$defs/hex128"
+        },
+        "namespace": {
+          "$ref": "#/$defs/identifier"
+        },
+        "expected_version": {
+          "$ref": "#/$defs/u64"
+        },
+        "ta_epoch": {
+          "$ref": "#/$defs/hex128"
+        },
+        "session_nonce": {
+          "$ref": "#/$defs/hex128"
+        }
+      },
+      "required": [
+        "operation_id",
+        "credential_ref",
+        "namespace",
+        "expected_version",
+        "ta_epoch",
+        "session_nonce"
+      ],
+      "additionalProperties": false
+    },
+    "REQUEST_OPENRequest": {
+      "type": "object",
+      "properties": {
+        "namespace": {
+          "$ref": "#/$defs/identifier"
+        },
+        "profile_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "credential_ref": {
+          "$ref": "#/$defs/hex128"
+        },
+        "expected_version": {
+          "$ref": "#/$defs/u64"
+        },
+        "operation": {
+          "enum": [
+            "CHAT",
+            "RESPONSES",
+            "MESSAGES",
+            "GENERATE",
+            "OLLAMA_CHAT",
+            "MODELS"
+          ]
+        },
+        "body_length": {
+          "$ref": "#/$defs/u64"
+        },
+        "overall_timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4294967295
+        },
+        "response_mode": {
+          "enum": [
+            "json",
+            "sse",
+            "ndjson"
+          ]
+        },
+        "completion_policy": {
+          "enum": [
+            "HTTP_COMPLETE",
+            "MODEL_TERMINAL"
+          ]
+        },
+        "headers": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "$ref": "#/$defs/inputHeader"
+          },
+          "default": []
+        },
+        "ta_epoch": {
+          "$ref": "#/$defs/hex128"
+        },
+        "session_nonce": {
+          "$ref": "#/$defs/hex128"
+        },
+        "remaining_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "model_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "namespace",
+        "profile_id",
+        "credential_ref",
+        "expected_version",
+        "operation",
+        "body_length",
+        "overall_timeout_ms",
+        "response_mode",
+        "completion_policy",
+        "ta_epoch",
+        "session_nonce"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "response_mode": {
+                "const": "json"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "completion_policy": {
+                "const": "HTTP_COMPLETE"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "MODELS"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "body_length": {
+                "const": "0"
+              },
+              "response_mode": {
+                "const": "json"
+              },
+              "completion_policy": {
+                "const": "HTTP_COMPLETE"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "GENERATE"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "model_id"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "model_id"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "response_mode": {
+                "const": "ndjson"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "operation": {
+                "const": "OLLAMA_CHAT"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "OLLAMA_CHAT"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "response_mode": {
+                "enum": [
+                  "json",
+                  "ndjson"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "BODY_CHUNKRequest": {
+      "type": "object",
+      "properties": {
+        "body_offset": {
+          "$ref": "#/$defs/u64"
+        },
+        "ta_epoch": {
+          "$ref": "#/$defs/hex128"
+        },
+        "session_nonce": {
+          "$ref": "#/$defs/hex128"
+        },
+        "remaining_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        }
+      },
+      "required": [
+        "body_offset",
+        "ta_epoch",
+        "session_nonce"
+      ],
+      "additionalProperties": false
+    },
+    "BODY_COMMITRequest": {
+      "type": "object",
+      "properties": {
+        "body_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "net_tx_credit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "app_rx_credit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "ta_epoch": {
+          "$ref": "#/$defs/hex128"
+        },
+        "session_nonce": {
+          "$ref": "#/$defs/hex128"
+        },
+        "remaining_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        }
+      },
+      "required": [
+        "body_sha256",
+        "net_tx_credit",
+        "app_rx_credit",
+        "ta_epoch",
+        "session_nonce"
+      ],
+      "additionalProperties": false
+    },
+    "STEPRequest": {
+      "type": "object",
+      "properties": {
+        "input_kind": {
+          "enum": [
+            "none",
+            "tls_rx",
+            "tcp_eof",
+            "network_error"
+          ]
+        },
+        "tls_rx_offset": {
+          "$ref": "#/$defs/u64"
+        },
+        "net_tx_credit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "app_rx_credit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "network_error_code": {
+          "enum": [
+            "dns_failed",
+            "connect_failed",
+            "connect_timeout",
+            "read_failed",
+            "write_failed",
+            "reset",
+            "idle_timeout"
+          ]
+        },
+        "ta_epoch": {
+          "$ref": "#/$defs/hex128"
+        },
+        "session_nonce": {
+          "$ref": "#/$defs/hex128"
+        },
+        "remaining_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        }
+      },
+      "required": [
+        "input_kind",
+        "tls_rx_offset",
+        "net_tx_credit",
+        "app_rx_credit",
+        "ta_epoch",
+        "session_nonce"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "input_kind": {
+                "const": "network_error"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "network_error_code"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "network_error_code"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "FINISHRequest": {
+      "type": "object",
+      "properties": {
+        "reason": {
+          "enum": [
+            "consumer_complete",
+            "response_consumed"
+          ]
+        },
+        "ta_epoch": {
+          "$ref": "#/$defs/hex128"
+        },
+        "session_nonce": {
+          "$ref": "#/$defs/hex128"
+        },
+        "remaining_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        }
+      },
+      "required": [
+        "reason",
+        "ta_epoch",
+        "session_nonce"
+      ],
+      "additionalProperties": false
+    },
+    "CANCELRequest": {
+      "type": "object",
+      "properties": {
+        "reason": {
+          "enum": [
+            "user",
+            "caller_gone",
+            "timeout",
+            "shutdown"
+          ]
+        },
+        "ta_epoch": {
+          "$ref": "#/$defs/hex128"
+        },
+        "session_nonce": {
+          "$ref": "#/$defs/hex128"
+        },
+        "remaining_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        }
+      },
+      "required": [
+        "reason",
+        "ta_epoch",
+        "session_nonce"
+      ],
+      "additionalProperties": false
+    },
+    "STATUSRequest": {
+      "type": "object",
+      "properties": {
+        "ta_epoch": {
+          "$ref": "#/$defs/hex128"
+        },
+        "session_nonce": {
+          "$ref": "#/$defs/hex128"
+        },
+        "remaining_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        }
+      },
+      "required": [
+        "ta_epoch",
+        "session_nonce"
+      ],
+      "additionalProperties": false
+    },
+    "helloReply": {
+      "type": "object",
+      "properties": {
+        "ta_epoch": {
+          "$ref": "#/$defs/hex128"
+        },
+        "session_nonce": {
+          "$ref": "#/$defs/hex128"
+        },
+        "next_call_seq": {
+          "$ref": "#/$defs/u64Positive"
+        },
+        "state": {
+          "const": "HELLO_READY"
+        },
+        "error": {
+          "type": "null"
+        },
+        "result": {
+          "$ref": "#/$defs/backendHelloResult"
+        },
+        "progress": {
+          "type": "null"
+        }
+      },
+      "required": [
+        "ta_epoch",
+        "session_nonce",
+        "next_call_seq",
+        "state",
+        "error",
+        "result",
+        "progress"
+      ],
+      "additionalProperties": false
+    },
+    "credentialReply": {
+      "type": "object",
+      "properties": {
+        "ta_epoch": {
+          "$ref": "#/$defs/hex128"
+        },
+        "session_nonce": {
+          "$ref": "#/$defs/hex128"
+        },
+        "next_call_seq": {
+          "$ref": "#/$defs/u64Positive"
+        },
+        "state": {
+          "const": "HELLO_READY"
+        },
+        "error": {
+          "type": "null"
+        },
+        "result": {
+          "$ref": "#/$defs/credentialResult"
+        },
+        "progress": {
+          "type": "null"
+        }
+      },
+      "required": [
+        "ta_epoch",
+        "session_nonce",
+        "next_call_seq",
+        "state",
+        "error",
+        "result",
+        "progress"
+      ],
+      "additionalProperties": false
+    },
+    "requestReply": {
+      "type": "object",
+      "properties": {
+        "ta_epoch": {
+          "$ref": "#/$defs/hex128"
+        },
+        "session_nonce": {
+          "$ref": "#/$defs/hex128"
+        },
+        "next_call_seq": {
+          "$ref": "#/$defs/u64Positive"
+        },
+        "state": {
+          "$ref": "#/$defs/state"
+        },
+        "error": {
+          "type": "null"
+        },
+        "result": {
+          "type": "null"
+        },
+        "progress": {
+          "$ref": "#/$defs/progress"
+        }
+      },
+      "required": [
+        "ta_epoch",
+        "session_nonce",
+        "next_call_seq",
+        "state",
+        "error",
+        "result",
+        "progress"
+      ],
+      "additionalProperties": false
+    },
+    "errorReply": {
+      "type": "object",
+      "properties": {
+        "ta_epoch": {
+          "$ref": "#/$defs/hex128"
+        },
+        "session_nonce": {
+          "$ref": "#/$defs/hex128"
+        },
+        "next_call_seq": {
+          "$ref": "#/$defs/u64Positive"
+        },
+        "state": {
+          "$ref": "#/$defs/state"
+        },
+        "error": {
+          "$ref": "#/$defs/error"
+        },
+        "result": {
+          "type": "null"
+        },
+        "progress": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/progress"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "ta_epoch",
+        "session_nonce",
+        "next_call_seq",
+        "state",
+        "error",
+        "result",
+        "progress"
+      ],
+      "additionalProperties": false
+    },
+    "validationEnvelope": {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "enum": [
+            "request",
+            "reply"
+          ]
+        },
+        "opcode": {
+          "enum": [
+            "HELLO",
+            "CREDENTIAL_PUT",
+            "CREDENTIAL_QUERY",
+            "CREDENTIAL_DELETE",
+            "REQUEST_OPEN",
+            "BODY_CHUNK",
+            "BODY_COMMIT",
+            "STEP",
+            "FINISH",
+            "CANCEL",
+            "STATUS"
+          ]
+        },
+        "status": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "request_bound": {
+          "type": "boolean"
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "direction",
+        "opcode",
+        "status",
+        "request_bound",
+        "metadata"
+      ],
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "direction": {
+              "const": "request"
+            },
+            "opcode": {
+              "const": "HELLO"
+            },
+            "status": {
+              "const": 0
+            },
+            "metadata": {
+              "$ref": "#/$defs/HELLORequest"
+            }
+          }
+        },
+        {
+          "properties": {
+            "direction": {
+              "const": "reply"
+            },
+            "opcode": {
+              "const": "HELLO"
+            },
+            "status": {
+              "const": 0
+            },
+            "metadata": {
+              "$ref": "#/$defs/helloReply"
+            }
+          }
+        },
+        {
+          "properties": {
+            "direction": {
+              "const": "request"
+            },
+            "opcode": {
+              "const": "CREDENTIAL_PUT"
+            },
+            "status": {
+              "const": 0
+            },
+            "metadata": {
+              "$ref": "#/$defs/CREDENTIAL_PUTRequest"
+            }
+          }
+        },
+        {
+          "properties": {
+            "direction": {
+              "const": "reply"
+            },
+            "opcode": {
+              "const": "CREDENTIAL_PUT"
+            },
+            "status": {
+              "const": 0
+            },
+            "metadata": {
+              "$ref": "#/$defs/credentialReply"
+            }
+          }
+        },
+        {
+          "properties": {
+            "direction": {
+              "const": "request"
+            },
+            "opcode": {
+              "const": "CREDENTIAL_QUERY"
+            },
+            "status": {
+              "const": 0
+            },
+            "metadata": {
+              "$ref": "#/$defs/CREDENTIAL_QUERYRequest"
+            }
+          }
+        },
+        {
+          "properties": {
+            "direction": {
+              "const": "reply"
+            },
+            "opcode": {
+              "const": "CREDENTIAL_QUERY"
+            },
+            "status": {
+              "const": 0
+            },
+            "metadata": {
+              "$ref": "#/$defs/credentialReply"
+            }
+          }
+        },
+        {
+          "properties": {
+            "direction": {
+              "const": "request"
+            },
+            "opcode": {
+              "const": "CREDENTIAL_DELETE"
+            },
+            "status": {
+              "const": 0
+            },
+            "metadata": {
+              "$ref": "#/$defs/CREDENTIAL_DELETERequest"
+            }
+          }
+        },
+        {
+          "properties": {
+            "direction": {
+              "const": "reply"
+            },
+            "opcode": {
+              "const": "CREDENTIAL_DELETE"
+            },
+            "status": {
+              "const": 0
+            },
+            "metadata": {
+              "$ref": "#/$defs/credentialReply"
+            }
+          }
+        },
+        {
+          "properties": {
+            "direction": {
+              "const": "request"
+            },
+            "opcode": {
+              "const": "REQUEST_OPEN"
+            },
+            "status": {
+              "const": 0
+            },
+            "metadata": {
+              "$ref": "#/$defs/REQUEST_OPENRequest"
+            }
+          }
+        },
+        {
+          "properties": {
+            "direction": {
+              "const": "reply"
+            },
+            "opcode": {
+              "const": "REQUEST_OPEN"
+            },
+            "status": {
+              "const": 0
+            },
+            "metadata": {
+              "$ref": "#/$defs/requestReply"
+            }
+          }
+        },
+        {
+          "properties": {
+            "direction": {
+              "const": "request"
+            },
+            "opcode": {
+              "const": "BODY_CHUNK"
+            },
+            "status": {
+              "const": 0
+            },
+            "metadata": {
+              "$ref": "#/$defs/BODY_CHUNKRequest"
+            }
+          }
+        },
+        {
+          "properties": {
+            "direction": {
+              "const": "reply"
+            },
+            "opcode": {
+              "const": "BODY_CHUNK"
+            },
+            "status": {
+              "const": 0
+            },
+            "metadata": {
+              "$ref": "#/$defs/requestReply"
+            }
+          }
+        },
+        {
+          "properties": {
+            "direction": {
+              "const": "request"
+            },
+            "opcode": {
+              "const": "BODY_COMMIT"
+            },
+            "status": {
+              "const": 0
+            },
+            "metadata": {
+              "$ref": "#/$defs/BODY_COMMITRequest"
+            }
+          }
+        },
+        {
+          "properties": {
+            "direction": {
+              "const": "reply"
+            },
+            "opcode": {
+              "const": "BODY_COMMIT"
+            },
+            "status": {
+              "const": 0
+            },
+            "metadata": {
+              "$ref": "#/$defs/requestReply"
+            }
+          }
+        },
+        {
+          "properties": {
+            "direction": {
+              "const": "request"
+            },
+            "opcode": {
+              "const": "STEP"
+            },
+            "status": {
+              "const": 0
+            },
+            "metadata": {
+              "$ref": "#/$defs/STEPRequest"
+            }
+          }
+        },
+        {
+          "properties": {
+            "direction": {
+              "const": "reply"
+            },
+            "opcode": {
+              "const": "STEP"
+            },
+            "status": {
+              "const": 0
+            },
+            "metadata": {
+              "$ref": "#/$defs/requestReply"
+            }
+          }
+        },
+        {
+          "properties": {
+            "direction": {
+              "const": "request"
+            },
+            "opcode": {
+              "const": "FINISH"
+            },
+            "status": {
+              "const": 0
+            },
+            "metadata": {
+              "$ref": "#/$defs/FINISHRequest"
+            }
+          }
+        },
+        {
+          "properties": {
+            "direction": {
+              "const": "reply"
+            },
+            "opcode": {
+              "const": "FINISH"
+            },
+            "status": {
+              "const": 0
+            },
+            "metadata": {
+              "$ref": "#/$defs/requestReply"
+            }
+          }
+        },
+        {
+          "properties": {
+            "direction": {
+              "const": "request"
+            },
+            "opcode": {
+              "const": "CANCEL"
+            },
+            "status": {
+              "const": 0
+            },
+            "metadata": {
+              "$ref": "#/$defs/CANCELRequest"
+            }
+          }
+        },
+        {
+          "properties": {
+            "direction": {
+              "const": "reply"
+            },
+            "opcode": {
+              "const": "CANCEL"
+            },
+            "status": {
+              "const": 0
+            },
+            "metadata": {
+              "$ref": "#/$defs/requestReply"
+            }
+          }
+        },
+        {
+          "properties": {
+            "direction": {
+              "const": "request"
+            },
+            "opcode": {
+              "const": "STATUS"
+            },
+            "status": {
+              "const": 0
+            },
+            "metadata": {
+              "$ref": "#/$defs/STATUSRequest"
+            }
+          }
+        },
+        {
+          "properties": {
+            "direction": {
+              "const": "reply"
+            },
+            "opcode": {
+              "const": "STATUS"
+            },
+            "status": {
+              "const": 0
+            },
+            "metadata": {
+              "$ref": "#/$defs/requestReply"
+            }
+          }
+        },
+        {
+          "properties": {
+            "direction": {
+              "const": "reply"
+            },
+            "status": {
+              "enum": [
+                4098,
+                4099,
+                4100,
+                4353,
+                4354,
+                4355,
+                4356,
+                4609,
+                4610,
+                4611,
+                4612,
+                4613,
+                4614,
+                4615,
+                4865,
+                4866,
+                4867,
+                4868,
+                4869,
+                5121,
+                5122,
+                5123,
+                5124,
+                5125,
+                8191
+              ]
+            },
+            "metadata": {
+              "$ref": "#/$defs/errorReply"
+            }
+          }
+        }
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 4098
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_WIRE_FORMAT"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 4099
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_VERSION"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 4100
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_ROLE"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 4353
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_STATE"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 4354
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_STALE_EPOCH"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 4355
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_SEQUENCE"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 4356
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_REQUEST_ID"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 4609
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_CREDENTIAL_NOT_FOUND"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 4610
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_VERSION_CONFLICT"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 4611
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_OPERATION_CONFLICT"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 4612
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_PROFILE_DENIED"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 4613
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_STORAGE"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 4614
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_CREDENTIAL_REVOKED"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 4615
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_STORAGE_NOT_COMMITTED"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 4865
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_BUSY"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 4866
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_LIMIT"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 4867
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_BODY_LENGTH"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 4868
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_BODY_OFFSET"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 4869
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_BODY_DIGEST"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 5121
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_TLS"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 5122
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_HTTP_PARSE"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 5123
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_NETWORK"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 5124
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_DEADLINE"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 5125
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_HTTP_LIMIT"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "const": 8191
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "metadata": {
+                "properties": {
+                  "error": {
+                    "properties": {
+                      "code": {
+                        "const": "E_INTERNAL"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "direction": {
+                "const": "reply"
+              },
+              "status": {
+                "not": {
+                  "const": 0
+                }
+              }
+            }
+          },
+          "then": {
+            "if": {
+              "anyOf": [
+                {
+                  "properties": {
+                    "opcode": {
+                      "enum": [
+                        "HELLO",
+                        "CREDENTIAL_PUT",
+                        "CREDENTIAL_QUERY",
+                        "CREDENTIAL_DELETE"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "properties": {
+                    "request_bound": {
+                      "const": false
+                    }
+                  }
+                },
+                {
+                  "properties": {
+                    "status": {
+                      "enum": [
+                        4098,
+                        4099,
+                        4354,
+                        4355,
+                        4356
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "then": {
+              "properties": {
+                "metadata": {
+                  "properties": {
+                    "progress": {
+                      "type": "null"
+                    }
+                  }
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "metadata": {
+                  "properties": {
+                    "progress": {
+                      "$ref": "#/$defs/progress"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "providerType": {
+      "type": "string",
+      "enum": [
+        "openai_compatible",
+        "openai_responses",
+        "anthropic_messages",
+        "google_gemini",
+        "ollama_native"
+      ]
+    },
+    "providerConfig": {
+      "type": "object",
+      "properties": {
+        "provider_type": {
+          "$ref": "#/$defs/providerType"
+        },
+        "base_url": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "pattern": "^https://",
+          "description": "HTTPS API prefix, normalized and bound to the credential. UTF-8 byte length at most 1024."
+        }
+      },
+      "required": [
+        "provider_type",
+        "base_url"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "x-protocol-source-sha256": "a566f9392a9c3e79c85e7c6284e56ea4e283241afd370286745ac8bd911b08ae",
+  "x-registry-sha256": "c61dae7fcdc960dd91084cc13c5f3523d2e6f0b40b9c293e9cef883ebd00c0cd",
+  "x-request-schemas": {
+    "HELLO": "#/$defs/HELLORequest",
+    "CREDENTIAL_PUT": "#/$defs/CREDENTIAL_PUTRequest",
+    "CREDENTIAL_QUERY": "#/$defs/CREDENTIAL_QUERYRequest",
+    "CREDENTIAL_DELETE": "#/$defs/CREDENTIAL_DELETERequest",
+    "REQUEST_OPEN": "#/$defs/REQUEST_OPENRequest",
+    "BODY_CHUNK": "#/$defs/BODY_CHUNKRequest",
+    "BODY_COMMIT": "#/$defs/BODY_COMMITRequest",
+    "STEP": "#/$defs/STEPRequest",
+    "FINISH": "#/$defs/FINISHRequest",
+    "CANCEL": "#/$defs/CANCELRequest",
+    "STATUS": "#/$defs/STATUSRequest"
+  },
+  "x-semantic-checks-outside-json-schema": [
+    "strict UTF-8 / duplicate keys / no float literals / depth 8",
+    "u64 numeric upper bound",
+    "header association and three length equality",
+    "payload format, slice coverage, credit, offsets and sequence",
+    "per-session request and terminal transition history",
+    "receipt/CAS/retention and actual storage commit",
+    "HTTP_HEAD encoded payload byte size and body stream intent"
+  ]
+}

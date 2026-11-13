@@ -1,0 +1,21 @@
+%% rust-libteec
+NOTICE===========================================
+Copyright (C) 2025-2026 KylinSoft Co., Ltd. <https://www.kylinos.cn/>
+The Apache-2.0 License
+END OF rust-libteec NOTICE
+
+--------THIRD-PARTY SOFTWARE NOTICES---------
+%% teaclave-trustzone-sdk
+NOTICE===========================================
+Copyright 2019-2025 The Apache Software Foundation
+The Apache-2.0 License
+===========================================
+END OF teaclave-trustzone-sdk NOTICE
+
+%% optee_client
+NOTICE===========================================
+Copyright (c) 2014, STMicroelectronics International N.V.
+Copyright (c) 2015, Linaro Limited
+The BSD2-Cluase License
+===========================================
+END OF optee_client NOTICE

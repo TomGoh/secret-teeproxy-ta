@@ -1,0 +1,3574 @@
+{
+  "format": "lsp-business-design-examples/1",
+  "classification": "DESIGN_FIXTURES_NOT_PRODUCT_IMPLEMENTATION",
+  "protocol_source": "ca-ta-protocol-v1-draft.md",
+  "protocol_source_sha256": "a566f9392a9c3e79c85e7c6284e56ea4e283241afd370286745ac8bd911b08ae",
+  "protocol_version": {
+    "major": 1,
+    "minor": 0
+  },
+  "fixture_only": {
+    "limits_are_not_device_capabilities": true,
+    "keys_are_fake": true,
+    "tls_bytes_are_synthetic_and_not_validated_records": true,
+    "no_network_or_sdk_calls": true,
+    "not_a_state_machine_execution_result": true,
+    "warning": "Do not use these values or synthetic TLS bytes as a deployed configuration."
+  },
+  "representation": {
+    "header_u64_fields": "call_seq and reserved1 are decimal strings in this readable representation; binary wire remains LE u64.",
+    "header_request_id": "32 lowercase hex characters represent 16 raw bytes, no GUID byte swap.",
+    "metadata_length_rule": "UTF-8 json.dumps(metadata,ensure_ascii=False,separators=(',',':')); preserve insertion order as shown.",
+    "payload": "payload_hex encodes all binary payload bytes; it is not itself the wire payload.",
+    "counter_scope": "Counters/offsets are checked across each independent trace only.",
+    "tls_fact_scope": "TLS/application counters beyond provided bytes are asserted scenario facts, not measured crypto behavior."
+  },
+  "fixture_limits": {
+    "frame_input_max": 16384,
+    "frame_output_max": 32768,
+    "json_max": 4096,
+    "max_request_body": 1048576,
+    "max_concurrent_requests": 4,
+    "max_sessions": 8,
+    "max_pending_net_rx": 65536,
+    "max_pending_net_tx": 65536,
+    "max_pending_http_body": 65536,
+    "upload_idle_ms": 10000,
+    "lease_ms": 30000,
+    "heartbeat_max_ms": 2000,
+    "max_overall_ms": 180000,
+    "max_header_bytes": 4096,
+    "max_credential_bytes": 4096,
+    "max_temporary_ttl_ms": 120000
+  },
+  "traces": [
+    {
+      "trace_id": "management_receipt",
+      "independent_scenario": true,
+      "preconditions": [
+        "Independent management scenario; ref aa...aa does not exist initially.",
+        "Permanent fake credential only; no request trace later uses this ref."
+      ],
+      "role": "management",
+      "session_nonce": "11111111111111111111111111111111",
+      "planned_request_id": "00000000000000000000000000000000",
+      "steps": [
+        {
+          "case_id": "management_receipt/hello",
+          "pre_state": "NEW",
+          "command": "HELLO",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 1,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 165,
+              "meta_len": 101,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "1",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "role": "management",
+              "supported_versions": [
+                {
+                  "major": 1,
+                  "minor": 0
+                }
+              ],
+              "client_name": "lsp-design-fixture"
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 1,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 1068,
+              "meta_len": 1004,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "1",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "11111111111111111111111111111111",
+              "next_call_seq": "2",
+              "state": "HELLO_READY",
+              "error": null,
+              "result": {
+                "selected_version": {
+                  "major": 1,
+                  "minor": 0
+                },
+                "role": "management",
+                "capabilities": {
+                  "operations": [
+                    "CHAT",
+                    "RESPONSES",
+                    "MESSAGES",
+                    "MODELS"
+                  ],
+                  "profiles": [
+                    {
+                      "id": "fixture_deepseek",
+                      "auth_by_operation": {
+                        "CHAT": "bearer",
+                        "RESPONSES": "bearer",
+                        "MESSAGES": "x_api_key",
+                        "MODELS": "bearer"
+                      }
+                    }
+                  ],
+                  "backend_contract_id": "DESIGN-FIXTURE-NOT-A-DEPLOYED-SDK",
+                  "features": [
+                    "bounded_pump",
+                    "business_cancel",
+                    "epoch_bound_sessions",
+                    "temporary_credentials"
+                  ]
+                },
+                "limits": {
+                  "frame_input_max": 16384,
+                  "frame_output_max": 32768,
+                  "json_max": 4096,
+                  "max_request_body": 1048576,
+                  "max_concurrent_requests": 4,
+                  "max_sessions": 8,
+                  "max_pending_net_rx": 65536,
+                  "max_pending_net_tx": 65536,
+                  "max_pending_http_body": 65536,
+                  "upload_idle_ms": 10000,
+                  "lease_ms": 30000,
+                  "heartbeat_max_ms": 2000,
+                  "max_overall_ms": 180000,
+                  "max_header_bytes": 4096,
+                  "max_credential_bytes": 4096,
+                  "max_temporary_ttl_ms": 120000
+                }
+              },
+              "progress": null
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 1068,
+            "p2_a": 0,
+            "p2_b": 1068
+          }
+        },
+        {
+          "case_id": "management_receipt/put",
+          "pre_state": "HELLO_READY",
+          "command": "CREDENTIAL_PUT",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 16,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 394,
+              "meta_len": 300,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "2",
+              "status": 0,
+              "payload_len": 30,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "11111111111111111111111111111111",
+              "operation_id": "abababababababababababababababab",
+              "credential_ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "namespace": "fixture_user",
+              "profile_id": "fixture_deepseek",
+              "expected_version": "0",
+              "temporary": false
+            },
+            "payload_hex": "46414b452d4c53502d4b45592d444f2d4e4f542d5553452d4f4e4c494e45"
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 16,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 547,
+              "meta_len": 483,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "2",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "11111111111111111111111111111111",
+              "next_call_seq": "3",
+              "state": "HELLO_READY",
+              "error": null,
+              "result": {
+                "credential_ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "namespace": "fixture_user",
+                "state": "live",
+                "version": "1",
+                "profile_id": "fixture_deepseek",
+                "temporary": false,
+                "ttl_remaining_ms": null,
+                "receipt": {
+                  "operation_id": "abababababababababababababababab",
+                  "operation": "put",
+                  "committed_version": "1"
+                },
+                "replayed": false
+              },
+              "progress": null
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 547,
+            "p2_a": 0,
+            "p2_b": 547
+          }
+        },
+        {
+          "case_id": "management_receipt/put_same_operation_old_expected_version",
+          "pre_state": "HELLO_READY",
+          "command": "CREDENTIAL_PUT",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 16,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 394,
+              "meta_len": 300,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "3",
+              "status": 0,
+              "payload_len": 30,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "11111111111111111111111111111111",
+              "operation_id": "abababababababababababababababab",
+              "credential_ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "namespace": "fixture_user",
+              "profile_id": "fixture_deepseek",
+              "expected_version": "0",
+              "temporary": false
+            },
+            "payload_hex": "46414b452d4c53502d4b45592d444f2d4e4f542d5553452d4f4e4c494e45"
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 16,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 546,
+              "meta_len": 482,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "3",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "11111111111111111111111111111111",
+              "next_call_seq": "4",
+              "state": "HELLO_READY",
+              "error": null,
+              "result": {
+                "credential_ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "namespace": "fixture_user",
+                "state": "live",
+                "version": "1",
+                "profile_id": "fixture_deepseek",
+                "temporary": false,
+                "ttl_remaining_ms": null,
+                "receipt": {
+                  "operation_id": "abababababababababababababababab",
+                  "operation": "put",
+                  "committed_version": "1"
+                },
+                "replayed": true
+              },
+              "progress": null
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 546,
+            "p2_a": 0,
+            "p2_b": 546
+          },
+          "annotations": {
+            "reason": "Receipt match precedes CAS. expected_version remains 0 although current version is 1; new call_seq is used."
+          }
+        },
+        {
+          "case_id": "management_receipt/query_live",
+          "pre_state": "HELLO_READY",
+          "command": "CREDENTIAL_QUERY",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 17,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 241,
+              "meta_len": 177,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "4",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "11111111111111111111111111111111",
+              "credential_ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "namespace": "fixture_user"
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 17,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 547,
+              "meta_len": 483,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "4",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "11111111111111111111111111111111",
+              "next_call_seq": "5",
+              "state": "HELLO_READY",
+              "error": null,
+              "result": {
+                "credential_ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "namespace": "fixture_user",
+                "state": "live",
+                "version": "1",
+                "profile_id": "fixture_deepseek",
+                "temporary": false,
+                "ttl_remaining_ms": null,
+                "receipt": {
+                  "operation_id": "abababababababababababababababab",
+                  "operation": "put",
+                  "committed_version": "1"
+                },
+                "replayed": false
+              },
+              "progress": null
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 547,
+            "p2_a": 0,
+            "p2_b": 547
+          }
+        },
+        {
+          "case_id": "management_receipt/delete",
+          "pre_state": "HELLO_READY",
+          "command": "CREDENTIAL_DELETE",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 18,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 314,
+              "meta_len": 250,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "5",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "11111111111111111111111111111111",
+              "operation_id": "acacacacacacacacacacacacacacacac",
+              "credential_ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "namespace": "fixture_user",
+              "expected_version": "1"
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 18,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 553,
+              "meta_len": 489,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "5",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "11111111111111111111111111111111",
+              "next_call_seq": "6",
+              "state": "HELLO_READY",
+              "error": null,
+              "result": {
+                "credential_ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "namespace": "fixture_user",
+                "state": "deleted",
+                "version": "2",
+                "profile_id": "fixture_deepseek",
+                "temporary": false,
+                "ttl_remaining_ms": null,
+                "receipt": {
+                  "operation_id": "acacacacacacacacacacacacacacacac",
+                  "operation": "delete",
+                  "committed_version": "2"
+                },
+                "replayed": false
+              },
+              "progress": null
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 553,
+            "p2_a": 0,
+            "p2_b": 553
+          }
+        },
+        {
+          "case_id": "management_receipt/delete_same_operation_old_expected_version",
+          "pre_state": "HELLO_READY",
+          "command": "CREDENTIAL_DELETE",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 18,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 314,
+              "meta_len": 250,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "6",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "11111111111111111111111111111111",
+              "operation_id": "acacacacacacacacacacacacacacacac",
+              "credential_ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "namespace": "fixture_user",
+              "expected_version": "1"
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 18,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 552,
+              "meta_len": 488,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "6",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "11111111111111111111111111111111",
+              "next_call_seq": "7",
+              "state": "HELLO_READY",
+              "error": null,
+              "result": {
+                "credential_ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "namespace": "fixture_user",
+                "state": "deleted",
+                "version": "2",
+                "profile_id": "fixture_deepseek",
+                "temporary": false,
+                "ttl_remaining_ms": null,
+                "receipt": {
+                  "operation_id": "acacacacacacacacacacacacacacacac",
+                  "operation": "delete",
+                  "committed_version": "2"
+                },
+                "replayed": true
+              },
+              "progress": null
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 552,
+            "p2_a": 0,
+            "p2_b": 552
+          }
+        },
+        {
+          "case_id": "management_receipt/query_tombstone",
+          "pre_state": "HELLO_READY",
+          "command": "CREDENTIAL_QUERY",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 17,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 241,
+              "meta_len": 177,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "7",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "11111111111111111111111111111111",
+              "credential_ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "namespace": "fixture_user"
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 17,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 553,
+              "meta_len": 489,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "7",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "11111111111111111111111111111111",
+              "next_call_seq": "8",
+              "state": "HELLO_READY",
+              "error": null,
+              "result": {
+                "credential_ref": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "namespace": "fixture_user",
+                "state": "deleted",
+                "version": "2",
+                "profile_id": "fixture_deepseek",
+                "temporary": false,
+                "ttl_remaining_ms": null,
+                "receipt": {
+                  "operation_id": "acacacacacacacacacacacacacacacac",
+                  "operation": "delete",
+                  "committed_version": "2"
+                },
+                "replayed": false
+              },
+              "progress": null
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 553,
+            "p2_a": 0,
+            "p2_b": 553
+          }
+        }
+      ]
+    },
+    {
+      "trace_id": "temporary_credential",
+      "independent_scenario": true,
+      "preconditions": [
+        "Independent management scenario; ref ba...ba is initially absent.",
+        "Limits/TTL are examples only. No permanent-to-temporary conversion."
+      ],
+      "role": "management",
+      "session_nonce": "12121212121212121212121212121212",
+      "planned_request_id": "00000000000000000000000000000000",
+      "steps": [
+        {
+          "case_id": "temporary_credential/hello",
+          "pre_state": "NEW",
+          "command": "HELLO",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 1,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 165,
+              "meta_len": 101,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "1",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "role": "management",
+              "supported_versions": [
+                {
+                  "major": 1,
+                  "minor": 0
+                }
+              ],
+              "client_name": "lsp-design-fixture"
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 1,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 1068,
+              "meta_len": 1004,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "1",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "12121212121212121212121212121212",
+              "next_call_seq": "2",
+              "state": "HELLO_READY",
+              "error": null,
+              "result": {
+                "selected_version": {
+                  "major": 1,
+                  "minor": 0
+                },
+                "role": "management",
+                "capabilities": {
+                  "operations": [
+                    "CHAT",
+                    "RESPONSES",
+                    "MESSAGES",
+                    "MODELS"
+                  ],
+                  "profiles": [
+                    {
+                      "id": "fixture_deepseek",
+                      "auth_by_operation": {
+                        "CHAT": "bearer",
+                        "RESPONSES": "bearer",
+                        "MESSAGES": "x_api_key",
+                        "MODELS": "bearer"
+                      }
+                    }
+                  ],
+                  "backend_contract_id": "DESIGN-FIXTURE-NOT-A-DEPLOYED-SDK",
+                  "features": [
+                    "bounded_pump",
+                    "business_cancel",
+                    "epoch_bound_sessions",
+                    "temporary_credentials"
+                  ]
+                },
+                "limits": {
+                  "frame_input_max": 16384,
+                  "frame_output_max": 32768,
+                  "json_max": 4096,
+                  "max_request_body": 1048576,
+                  "max_concurrent_requests": 4,
+                  "max_sessions": 8,
+                  "max_pending_net_rx": 65536,
+                  "max_pending_net_tx": 65536,
+                  "max_pending_http_body": 65536,
+                  "upload_idle_ms": 10000,
+                  "lease_ms": 30000,
+                  "heartbeat_max_ms": 2000,
+                  "max_overall_ms": 180000,
+                  "max_header_bytes": 4096,
+                  "max_credential_bytes": 4096,
+                  "max_temporary_ttl_ms": 120000
+                }
+              },
+              "progress": null
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 1068,
+            "p2_a": 0,
+            "p2_b": 1068
+          }
+        },
+        {
+          "case_id": "temporary_credential/put_temporary",
+          "pre_state": "HELLO_READY",
+          "command": "CREDENTIAL_PUT",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 16,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 408,
+              "meta_len": 314,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "2",
+              "status": 0,
+              "payload_len": 30,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "12121212121212121212121212121212",
+              "operation_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "credential_ref": "babababababababababababababababa",
+              "namespace": "fixture_user",
+              "profile_id": "fixture_deepseek",
+              "expected_version": "0",
+              "temporary": true,
+              "ttl_ms": 60000
+            },
+            "payload_hex": "46414b452d4c53502d4b45592d444f2d4e4f542d5553452d4f4e4c494e45"
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 16,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 547,
+              "meta_len": 483,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "2",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "12121212121212121212121212121212",
+              "next_call_seq": "3",
+              "state": "HELLO_READY",
+              "error": null,
+              "result": {
+                "credential_ref": "babababababababababababababababa",
+                "namespace": "fixture_user",
+                "state": "live",
+                "version": "1",
+                "profile_id": "fixture_deepseek",
+                "temporary": true,
+                "ttl_remaining_ms": 60000,
+                "receipt": {
+                  "operation_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "operation": "put",
+                  "committed_version": "1"
+                },
+                "replayed": false
+              },
+              "progress": null
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 547,
+            "p2_a": 0,
+            "p2_b": 547
+          }
+        },
+        {
+          "case_id": "temporary_credential/query_temporary",
+          "pre_state": "HELLO_READY",
+          "command": "CREDENTIAL_QUERY",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 17,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 241,
+              "meta_len": 177,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "3",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "12121212121212121212121212121212",
+              "credential_ref": "babababababababababababababababa",
+              "namespace": "fixture_user"
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 17,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 547,
+              "meta_len": 483,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "3",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "12121212121212121212121212121212",
+              "next_call_seq": "4",
+              "state": "HELLO_READY",
+              "error": null,
+              "result": {
+                "credential_ref": "babababababababababababababababa",
+                "namespace": "fixture_user",
+                "state": "live",
+                "version": "1",
+                "profile_id": "fixture_deepseek",
+                "temporary": true,
+                "ttl_remaining_ms": 59000,
+                "receipt": {
+                  "operation_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "operation": "put",
+                  "committed_version": "1"
+                },
+                "replayed": false
+              },
+              "progress": null
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 547,
+            "p2_a": 0,
+            "p2_b": 547
+          },
+          "annotations": {
+            "fixture_elapsed_ms": 1000
+          }
+        }
+      ]
+    },
+    {
+      "trace_id": "model_terminal_before_http_end",
+      "independent_scenario": true,
+      "preconditions": [
+        "Independent request scenario; durable fake ref dd...dd version 7 is provisioned.",
+        "It is unrelated to deleted ref aa...aa in management_receipt.",
+        "All TLS payloads here are intentionally noncryptographic synthetic bytes."
+      ],
+      "role": "request",
+      "session_nonce": "21212121212121212121212121212121",
+      "planned_request_id": "31313131313131313131313131313131",
+      "steps": [
+        {
+          "case_id": "model_terminal_before_http_end/hello",
+          "pre_state": "NEW",
+          "command": "HELLO",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 1,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 162,
+              "meta_len": 98,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "1",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "role": "request",
+              "supported_versions": [
+                {
+                  "major": 1,
+                  "minor": 0
+                }
+              ],
+              "client_name": "lsp-design-fixture"
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 1,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 1065,
+              "meta_len": 1001,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "1",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "21212121212121212121212121212121",
+              "next_call_seq": "2",
+              "state": "HELLO_READY",
+              "error": null,
+              "result": {
+                "selected_version": {
+                  "major": 1,
+                  "minor": 0
+                },
+                "role": "request",
+                "capabilities": {
+                  "operations": [
+                    "CHAT",
+                    "RESPONSES",
+                    "MESSAGES",
+                    "MODELS"
+                  ],
+                  "profiles": [
+                    {
+                      "id": "fixture_deepseek",
+                      "auth_by_operation": {
+                        "CHAT": "bearer",
+                        "RESPONSES": "bearer",
+                        "MESSAGES": "x_api_key",
+                        "MODELS": "bearer"
+                      }
+                    }
+                  ],
+                  "backend_contract_id": "DESIGN-FIXTURE-NOT-A-DEPLOYED-SDK",
+                  "features": [
+                    "bounded_pump",
+                    "business_cancel",
+                    "epoch_bound_sessions",
+                    "temporary_credentials"
+                  ]
+                },
+                "limits": {
+                  "frame_input_max": 16384,
+                  "frame_output_max": 32768,
+                  "json_max": 4096,
+                  "max_request_body": 1048576,
+                  "max_concurrent_requests": 4,
+                  "max_sessions": 8,
+                  "max_pending_net_rx": 65536,
+                  "max_pending_net_tx": 65536,
+                  "max_pending_http_body": 65536,
+                  "upload_idle_ms": 10000,
+                  "lease_ms": 30000,
+                  "heartbeat_max_ms": 2000,
+                  "max_overall_ms": 180000,
+                  "max_header_bytes": 4096,
+                  "max_credential_bytes": 4096,
+                  "max_temporary_ttl_ms": 120000
+                }
+              },
+              "progress": null
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 1065,
+            "p2_a": 0,
+            "p2_b": 1065
+          }
+        },
+        {
+          "case_id": "model_terminal_before_http_end/open",
+          "pre_state": "HELLO_READY",
+          "command": "REQUEST_OPEN",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 256,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 484,
+              "meta_len": 420,
+              "request_id": "31313131313131313131313131313131",
+              "call_seq": "2",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "21212121212121212121212121212121",
+              "namespace": "fixture_user",
+              "profile_id": "fixture_deepseek",
+              "credential_ref": "dddddddddddddddddddddddddddddddd",
+              "expected_version": "7",
+              "operation": "CHAT",
+              "body_length": "95",
+              "overall_timeout_ms": 120000,
+              "response_mode": "sse",
+              "completion_policy": "MODEL_TERMINAL",
+              "headers": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ]
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 256,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 506,
+              "meta_len": 442,
+              "request_id": "31313131313131313131313131313131",
+              "call_seq": "2",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "21212121212121212121212121212121",
+              "next_call_seq": "3",
+              "state": "UPLOADING",
+              "error": null,
+              "result": null,
+              "progress": {
+                "accepted_input_bytes": 0,
+                "uploaded_body": "0",
+                "accepted_tls_rx": "0",
+                "emitted_tls_tx": "0",
+                "emitted_http_body": "0",
+                "rx_credit": 0,
+                "net_tx_pending": false,
+                "http_body_pending": false,
+                "need_step": false,
+                "poll_after_ms": 1000,
+                "events": [],
+                "terminal": null,
+                "connect_target": null
+              }
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 506,
+            "p2_a": 0,
+            "p2_b": 506
+          }
+        },
+        {
+          "case_id": "model_terminal_before_http_end/upload_part_1",
+          "pre_state": "UPLOADING",
+          "command": "BODY_CHUNK",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 257,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 227,
+              "meta_len": 116,
+              "request_id": "31313131313131313131313131313131",
+              "call_seq": "3",
+              "status": 0,
+              "payload_len": 47,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "21212121212121212121212121212121",
+              "body_offset": "0"
+            },
+            "payload_hex": "7b226d6f64656c223a22666978747572652d6d6f64656c222c226d65737361676573223a5b7b22726f6c65223a2275"
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 257,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 508,
+              "meta_len": 444,
+              "request_id": "31313131313131313131313131313131",
+              "call_seq": "3",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "21212121212121212121212121212121",
+              "next_call_seq": "4",
+              "state": "UPLOADING",
+              "error": null,
+              "result": null,
+              "progress": {
+                "accepted_input_bytes": 47,
+                "uploaded_body": "47",
+                "accepted_tls_rx": "0",
+                "emitted_tls_tx": "0",
+                "emitted_http_body": "0",
+                "rx_credit": 0,
+                "net_tx_pending": false,
+                "http_body_pending": false,
+                "need_step": false,
+                "poll_after_ms": 1000,
+                "events": [],
+                "terminal": null,
+                "connect_target": null
+              }
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 508,
+            "p2_a": 0,
+            "p2_b": 508
+          }
+        },
+        {
+          "case_id": "model_terminal_before_http_end/upload_part_2",
+          "pre_state": "UPLOADING",
+          "command": "BODY_CHUNK",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 257,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 229,
+              "meta_len": 117,
+              "request_id": "31313131313131313131313131313131",
+              "call_seq": "4",
+              "status": 0,
+              "payload_len": 48,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "21212121212121212121212121212121",
+              "body_offset": "47"
+            },
+            "payload_hex": "736572222c22636f6e74656e74223a22e4bda0e5a5bd2066697874757265227d5d2c2273747265616d223a747275657d"
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 257,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 508,
+              "meta_len": 444,
+              "request_id": "31313131313131313131313131313131",
+              "call_seq": "4",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "21212121212121212121212121212121",
+              "next_call_seq": "5",
+              "state": "UPLOADING",
+              "error": null,
+              "result": null,
+              "progress": {
+                "accepted_input_bytes": 48,
+                "uploaded_body": "95",
+                "accepted_tls_rx": "0",
+                "emitted_tls_tx": "0",
+                "emitted_http_body": "0",
+                "rx_credit": 0,
+                "net_tx_pending": false,
+                "http_body_pending": false,
+                "need_step": false,
+                "poll_after_ms": 1000,
+                "events": [],
+                "terminal": null,
+                "connect_target": null
+              }
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 508,
+            "p2_a": 0,
+            "p2_b": 508
+          }
+        },
+        {
+          "case_id": "model_terminal_before_http_end/commit",
+          "pre_state": "UPLOADING",
+          "command": "BODY_COMMIT",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 258,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 285,
+              "meta_len": 221,
+              "request_id": "31313131313131313131313131313131",
+              "call_seq": "5",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "21212121212121212121212121212121",
+              "body_sha256": "8570614f2b785121efbc93c8746a036be431243a2840e6bd4f6a78687f23df15",
+              "net_tx_credit": 4096,
+              "app_rx_credit": 8192
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 258,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 719,
+              "meta_len": 630,
+              "request_id": "31313131313131313131313131313131",
+              "call_seq": "5",
+              "status": 0,
+              "payload_len": 25,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "21212121212121212121212121212121",
+              "next_call_seq": "6",
+              "state": "HANDSHAKING",
+              "error": null,
+              "result": null,
+              "progress": {
+                "accepted_input_bytes": 0,
+                "uploaded_body": "95",
+                "accepted_tls_rx": "0",
+                "emitted_tls_tx": "25",
+                "emitted_http_body": "0",
+                "rx_credit": 4096,
+                "net_tx_pending": false,
+                "http_body_pending": false,
+                "need_step": false,
+                "poll_after_ms": 1000,
+                "events": [
+                  {
+                    "event_seq": "1",
+                    "kind": "NET_TX",
+                    "offset": 0,
+                    "length": 25,
+                    "stream_offset": "0",
+                    "may_contain_request": false
+                  }
+                ],
+                "terminal": null,
+                "connect_target": {
+                  "host": "api.example.test",
+                  "port": 443,
+                  "sni": "api.example.test",
+                  "alpn": "http/1.1"
+                }
+              }
+            },
+            "payload_hex": "4e4f542d5245414c2d544c532d434c49454e542d48454c4c4f"
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 719,
+            "p2_a": 0,
+            "p2_b": 719
+          }
+        },
+        {
+          "case_id": "model_terminal_before_http_end/heartbeat",
+          "pre_state": "HANDSHAKING",
+          "command": "STEP",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 259,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 244,
+              "meta_len": 180,
+              "request_id": "31313131313131313131313131313131",
+              "call_seq": "6",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "21212121212121212121212121212121",
+              "input_kind": "none",
+              "tls_rx_offset": "0",
+              "net_tx_credit": 4096,
+              "app_rx_credit": 8192
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 259,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 513,
+              "meta_len": 449,
+              "request_id": "31313131313131313131313131313131",
+              "call_seq": "6",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "21212121212121212121212121212121",
+              "next_call_seq": "7",
+              "state": "HANDSHAKING",
+              "error": null,
+              "result": null,
+              "progress": {
+                "accepted_input_bytes": 0,
+                "uploaded_body": "95",
+                "accepted_tls_rx": "0",
+                "emitted_tls_tx": "25",
+                "emitted_http_body": "0",
+                "rx_credit": 4096,
+                "net_tx_pending": false,
+                "http_body_pending": false,
+                "need_step": false,
+                "poll_after_ms": 1000,
+                "events": [],
+                "terminal": null,
+                "connect_target": null
+              }
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 513,
+            "p2_a": 0,
+            "p2_b": 513
+          }
+        },
+        {
+          "case_id": "model_terminal_before_http_end/receive_handshake",
+          "pre_state": "HANDSHAKING",
+          "command": "STEP",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 259,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 275,
+              "meta_len": 182,
+              "request_id": "31313131313131313131313131313131",
+              "call_seq": "7",
+              "status": 0,
+              "payload_len": 29,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "21212121212121212121212121212121",
+              "input_kind": "tls_rx",
+              "tls_rx_offset": "0",
+              "net_tx_credit": 4096,
+              "app_rx_credit": 8192
+            },
+            "payload_hex": "4e4f542d5245414c2d544c532d5345525645522d48414e445348414b45"
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 259,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 645,
+              "meta_len": 554,
+              "request_id": "31313131313131313131313131313131",
+              "call_seq": "7",
+              "status": 0,
+              "payload_len": 27,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "21212121212121212121212121212121",
+              "next_call_seq": "8",
+              "state": "EXCHANGING",
+              "error": null,
+              "result": null,
+              "progress": {
+                "accepted_input_bytes": 29,
+                "uploaded_body": "95",
+                "accepted_tls_rx": "29",
+                "emitted_tls_tx": "52",
+                "emitted_http_body": "0",
+                "rx_credit": 4096,
+                "net_tx_pending": false,
+                "http_body_pending": false,
+                "need_step": false,
+                "poll_after_ms": 1000,
+                "events": [
+                  {
+                    "event_seq": "2",
+                    "kind": "NET_TX",
+                    "offset": 0,
+                    "length": 27,
+                    "stream_offset": "25",
+                    "may_contain_request": true
+                  }
+                ],
+                "terminal": null,
+                "connect_target": null
+              }
+            },
+            "payload_hex": "4e4f542d5245414c2d544c532d524551554553542d5245434f5244"
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 645,
+            "p2_a": 0,
+            "p2_b": 645
+          }
+        },
+        {
+          "case_id": "model_terminal_before_http_end/receive_model_terminal",
+          "pre_state": "EXCHANGING",
+          "command": "STEP",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 259,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 275,
+              "meta_len": 183,
+              "request_id": "31313131313131313131313131313131",
+              "call_seq": "8",
+              "status": 0,
+              "payload_len": 28,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "21212121212121212121212121212121",
+              "input_kind": "tls_rx",
+              "tls_rx_offset": "29",
+              "net_tx_credit": 4096,
+              "app_rx_credit": 8192
+            },
+            "payload_hex": "4e4f542d5245414c2d544c532d524553504f4e53452d5245434f5244"
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 259,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 928,
+              "meta_len": 595,
+              "request_id": "31313131313131313131313131313131",
+              "call_seq": "8",
+              "status": 0,
+              "payload_len": 269,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "21212121212121212121212121212121",
+              "next_call_seq": "9",
+              "state": "EXCHANGING",
+              "error": null,
+              "result": null,
+              "progress": {
+                "accepted_input_bytes": 28,
+                "uploaded_body": "95",
+                "accepted_tls_rx": "57",
+                "emitted_tls_tx": "52",
+                "emitted_http_body": "144",
+                "rx_credit": 4096,
+                "net_tx_pending": false,
+                "http_body_pending": false,
+                "need_step": false,
+                "poll_after_ms": 1000,
+                "events": [
+                  {
+                    "event_seq": "3",
+                    "kind": "HTTP_HEAD",
+                    "offset": 0,
+                    "length": 125
+                  },
+                  {
+                    "event_seq": "4",
+                    "kind": "HTTP_BODY",
+                    "offset": 125,
+                    "length": 144,
+                    "stream_offset": "0"
+                  }
+                ],
+                "terminal": null,
+                "connect_target": null
+              }
+            },
+            "payload_hex": "7b22737461747573223a3230302c2268656164657273223a5b7b226e616d65223a22636f6e74656e742d74797065222c2276616c7565223a22746578742f6576656e742d73747265616d227d2c7b226e616d65223a227472616e736665722d656e636f64696e67222c2276616c7565223a226368756e6b6564227d5d7d646174613a207b2263686f69636573223a5b7b2264656c7461223a7b22636f6e74656e74223a22e4bda0e5a5bd227d2c2266696e6973685f726561736f6e223a6e756c6c7d5d7d0a0a646174613a207b2263686f69636573223a5b7b2264656c7461223a7b7d2c2266696e6973685f726561736f6e223a2273746f70227d5d7d0a0a646174613a205b444f4e455d0a0a"
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 928,
+            "p2_a": 0,
+            "p2_b": 928
+          },
+          "annotations": {
+            "observer_latches": "completed",
+            "http_framing_still": "in_progress",
+            "http_chunk_terminator_observed": false,
+            "ui_may_still_have_pending_body": true
+          }
+        },
+        {
+          "case_id": "model_terminal_before_http_end/finish_early",
+          "pre_state": "EXCHANGING",
+          "command": "FINISH",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 260,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 191,
+              "meta_len": 127,
+              "request_id": "31313131313131313131313131313131",
+              "call_seq": "9",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "21212121212121212121212121212121",
+              "reason": "consumer_complete"
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 260,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 1070,
+              "meta_len": 1006,
+              "request_id": "31313131313131313131313131313131",
+              "call_seq": "9",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "21212121212121212121212121212121",
+              "next_call_seq": "10",
+              "state": "ENDED",
+              "error": null,
+              "result": null,
+              "progress": {
+                "accepted_input_bytes": 0,
+                "uploaded_body": "95",
+                "accepted_tls_rx": "57",
+                "emitted_tls_tx": "52",
+                "emitted_http_body": "144",
+                "rx_credit": 0,
+                "net_tx_pending": false,
+                "http_body_pending": false,
+                "need_step": false,
+                "poll_after_ms": 0,
+                "events": [
+                  {
+                    "event_seq": "5",
+                    "kind": "REQUEST_END",
+                    "offset": 0,
+                    "length": 0,
+                    "details": {
+                      "end_reason": "consumer_complete",
+                      "http_framing": "in_progress",
+                      "tls_phase": "application",
+                      "close_notify_received": false,
+                      "request_application_bytes_generated": "256",
+                      "emitted_http_body": "144",
+                      "app_resources": "released",
+                      "manager_cleanup": "not_asserted"
+                    }
+                  }
+                ],
+                "terminal": {
+                  "end_reason": "consumer_complete",
+                  "http_framing": "in_progress",
+                  "tls_phase": "application",
+                  "close_notify_received": false,
+                  "request_application_bytes_generated": "256",
+                  "emitted_http_body": "144",
+                  "app_resources": "released",
+                  "manager_cleanup": "not_asserted"
+                },
+                "connect_target": null
+              }
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 1070,
+            "p2_a": 0,
+            "p2_b": 1070
+          },
+          "annotations": {
+            "all_new_output_is_control_only": true,
+            "ca_must_keep_previously_owned_app_rx": true,
+            "caller_terminal_after_consumption_barrier": {
+              "outcome": "completed",
+              "model_outcome": "completed",
+              "http_status": 200,
+              "model_stop_reason": "stop",
+              "transport_snapshot": {
+                "end_reason": "consumer_complete",
+                "http_framing": "in_progress",
+                "tls_phase": "application",
+                "close_notify_received": false,
+                "request_application_bytes_generated": "256",
+                "emitted_http_body": "144",
+                "app_resources": "released",
+                "manager_cleanup": "not_asserted"
+              },
+              "delivered_body_bytes": "144",
+              "side_effect_state": "response_observed",
+              "cleanup_state": "pending"
+            },
+            "request_application_bytes_generated_is_fixture_fact_not_crypto_measurement": true
+          }
+        },
+        {
+          "case_id": "model_terminal_before_http_end/status_ended",
+          "pre_state": "ENDED",
+          "command": "STATUS",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 262,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 162,
+              "meta_len": 98,
+              "request_id": "31313131313131313131313131313131",
+              "call_seq": "10",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "21212121212121212121212121212121"
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 262,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 750,
+              "meta_len": 686,
+              "request_id": "31313131313131313131313131313131",
+              "call_seq": "10",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "21212121212121212121212121212121",
+              "next_call_seq": "11",
+              "state": "ENDED",
+              "error": null,
+              "result": null,
+              "progress": {
+                "accepted_input_bytes": 0,
+                "uploaded_body": "95",
+                "accepted_tls_rx": "57",
+                "emitted_tls_tx": "52",
+                "emitted_http_body": "144",
+                "rx_credit": 0,
+                "net_tx_pending": false,
+                "http_body_pending": false,
+                "need_step": false,
+                "poll_after_ms": 0,
+                "events": [],
+                "terminal": {
+                  "end_reason": "consumer_complete",
+                  "http_framing": "in_progress",
+                  "tls_phase": "application",
+                  "close_notify_received": false,
+                  "request_application_bytes_generated": "256",
+                  "emitted_http_body": "144",
+                  "app_resources": "released",
+                  "manager_cleanup": "not_asserted"
+                },
+                "connect_target": null
+              }
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 750,
+            "p2_a": 0,
+            "p2_b": 750
+          }
+        },
+        {
+          "case_id": "model_terminal_before_http_end/finish_again",
+          "pre_state": "ENDED",
+          "command": "FINISH",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 260,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 191,
+              "meta_len": 127,
+              "request_id": "31313131313131313131313131313131",
+              "call_seq": "11",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "21212121212121212121212121212121",
+              "reason": "consumer_complete"
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 260,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 750,
+              "meta_len": 686,
+              "request_id": "31313131313131313131313131313131",
+              "call_seq": "11",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "21212121212121212121212121212121",
+              "next_call_seq": "12",
+              "state": "ENDED",
+              "error": null,
+              "result": null,
+              "progress": {
+                "accepted_input_bytes": 0,
+                "uploaded_body": "95",
+                "accepted_tls_rx": "57",
+                "emitted_tls_tx": "52",
+                "emitted_http_body": "144",
+                "rx_credit": 0,
+                "net_tx_pending": false,
+                "http_body_pending": false,
+                "need_step": false,
+                "poll_after_ms": 0,
+                "events": [],
+                "terminal": {
+                  "end_reason": "consumer_complete",
+                  "http_framing": "in_progress",
+                  "tls_phase": "application",
+                  "close_notify_received": false,
+                  "request_application_bytes_generated": "256",
+                  "emitted_http_body": "144",
+                  "app_resources": "released",
+                  "manager_cleanup": "not_asserted"
+                },
+                "connect_target": null
+              }
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 750,
+            "p2_a": 0,
+            "p2_b": 750
+          }
+        }
+      ]
+    },
+    {
+      "trace_id": "cancel_during_upload",
+      "independent_scenario": true,
+      "preconditions": [
+        "Independent request scenario; durable fake ref ee...ee version 3 exists.",
+        "No upstream connection or TLS work has started."
+      ],
+      "role": "request",
+      "session_nonce": "22222222222222222222222222222222",
+      "planned_request_id": "32323232323232323232323232323232",
+      "steps": [
+        {
+          "case_id": "cancel_during_upload/hello",
+          "pre_state": "NEW",
+          "command": "HELLO",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 1,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 162,
+              "meta_len": 98,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "1",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "role": "request",
+              "supported_versions": [
+                {
+                  "major": 1,
+                  "minor": 0
+                }
+              ],
+              "client_name": "lsp-design-fixture"
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 1,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 1065,
+              "meta_len": 1001,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "1",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "22222222222222222222222222222222",
+              "next_call_seq": "2",
+              "state": "HELLO_READY",
+              "error": null,
+              "result": {
+                "selected_version": {
+                  "major": 1,
+                  "minor": 0
+                },
+                "role": "request",
+                "capabilities": {
+                  "operations": [
+                    "CHAT",
+                    "RESPONSES",
+                    "MESSAGES",
+                    "MODELS"
+                  ],
+                  "profiles": [
+                    {
+                      "id": "fixture_deepseek",
+                      "auth_by_operation": {
+                        "CHAT": "bearer",
+                        "RESPONSES": "bearer",
+                        "MESSAGES": "x_api_key",
+                        "MODELS": "bearer"
+                      }
+                    }
+                  ],
+                  "backend_contract_id": "DESIGN-FIXTURE-NOT-A-DEPLOYED-SDK",
+                  "features": [
+                    "bounded_pump",
+                    "business_cancel",
+                    "epoch_bound_sessions",
+                    "temporary_credentials"
+                  ]
+                },
+                "limits": {
+                  "frame_input_max": 16384,
+                  "frame_output_max": 32768,
+                  "json_max": 4096,
+                  "max_request_body": 1048576,
+                  "max_concurrent_requests": 4,
+                  "max_sessions": 8,
+                  "max_pending_net_rx": 65536,
+                  "max_pending_net_tx": 65536,
+                  "max_pending_http_body": 65536,
+                  "upload_idle_ms": 10000,
+                  "lease_ms": 30000,
+                  "heartbeat_max_ms": 2000,
+                  "max_overall_ms": 180000,
+                  "max_header_bytes": 4096,
+                  "max_credential_bytes": 4096,
+                  "max_temporary_ttl_ms": 120000
+                }
+              },
+              "progress": null
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 1065,
+            "p2_a": 0,
+            "p2_b": 1065
+          }
+        },
+        {
+          "case_id": "cancel_during_upload/open",
+          "pre_state": "HELLO_READY",
+          "command": "REQUEST_OPEN",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 256,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 484,
+              "meta_len": 420,
+              "request_id": "32323232323232323232323232323232",
+              "call_seq": "2",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "22222222222222222222222222222222",
+              "namespace": "fixture_user",
+              "profile_id": "fixture_deepseek",
+              "credential_ref": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+              "expected_version": "3",
+              "operation": "CHAT",
+              "body_length": "95",
+              "overall_timeout_ms": 120000,
+              "response_mode": "sse",
+              "completion_policy": "MODEL_TERMINAL",
+              "headers": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ]
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 256,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 506,
+              "meta_len": 442,
+              "request_id": "32323232323232323232323232323232",
+              "call_seq": "2",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "22222222222222222222222222222222",
+              "next_call_seq": "3",
+              "state": "UPLOADING",
+              "error": null,
+              "result": null,
+              "progress": {
+                "accepted_input_bytes": 0,
+                "uploaded_body": "0",
+                "accepted_tls_rx": "0",
+                "emitted_tls_tx": "0",
+                "emitted_http_body": "0",
+                "rx_credit": 0,
+                "net_tx_pending": false,
+                "http_body_pending": false,
+                "need_step": false,
+                "poll_after_ms": 1000,
+                "events": [],
+                "terminal": null,
+                "connect_target": null
+              }
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 506,
+            "p2_a": 0,
+            "p2_b": 506
+          }
+        },
+        {
+          "case_id": "cancel_during_upload/partial_upload",
+          "pre_state": "UPLOADING",
+          "command": "BODY_CHUNK",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 257,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 193,
+              "meta_len": 116,
+              "request_id": "32323232323232323232323232323232",
+              "call_seq": "3",
+              "status": 0,
+              "payload_len": 13,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "22222222222222222222222222222222",
+              "body_offset": "0"
+            },
+            "payload_hex": "7b226d6f64656c223a22666978"
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 257,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 508,
+              "meta_len": 444,
+              "request_id": "32323232323232323232323232323232",
+              "call_seq": "3",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "22222222222222222222222222222222",
+              "next_call_seq": "4",
+              "state": "UPLOADING",
+              "error": null,
+              "result": null,
+              "progress": {
+                "accepted_input_bytes": 13,
+                "uploaded_body": "13",
+                "accepted_tls_rx": "0",
+                "emitted_tls_tx": "0",
+                "emitted_http_body": "0",
+                "rx_credit": 0,
+                "net_tx_pending": false,
+                "http_body_pending": false,
+                "need_step": false,
+                "poll_after_ms": 1000,
+                "events": [],
+                "terminal": null,
+                "connect_target": null
+              }
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 508,
+            "p2_a": 0,
+            "p2_b": 508
+          }
+        },
+        {
+          "case_id": "cancel_during_upload/cancel",
+          "pre_state": "UPLOADING",
+          "command": "CANCEL",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 261,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 178,
+              "meta_len": 114,
+              "request_id": "32323232323232323232323232323232",
+              "call_seq": "4",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "22222222222222222222222222222222",
+              "reason": "user"
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 261,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 1045,
+              "meta_len": 981,
+              "request_id": "32323232323232323232323232323232",
+              "call_seq": "4",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "22222222222222222222222222222222",
+              "next_call_seq": "5",
+              "state": "CANCELLED",
+              "error": null,
+              "result": null,
+              "progress": {
+                "accepted_input_bytes": 0,
+                "uploaded_body": "13",
+                "accepted_tls_rx": "0",
+                "emitted_tls_tx": "0",
+                "emitted_http_body": "0",
+                "rx_credit": 0,
+                "net_tx_pending": false,
+                "http_body_pending": false,
+                "need_step": false,
+                "poll_after_ms": 0,
+                "events": [
+                  {
+                    "event_seq": "1",
+                    "kind": "REQUEST_END",
+                    "offset": 0,
+                    "length": 0,
+                    "details": {
+                      "end_reason": "cancelled",
+                      "http_framing": "not_started",
+                      "tls_phase": "not_started",
+                      "close_notify_received": false,
+                      "request_application_bytes_generated": "0",
+                      "emitted_http_body": "0",
+                      "app_resources": "released",
+                      "manager_cleanup": "not_asserted"
+                    }
+                  }
+                ],
+                "terminal": {
+                  "end_reason": "cancelled",
+                  "http_framing": "not_started",
+                  "tls_phase": "not_started",
+                  "close_notify_received": false,
+                  "request_application_bytes_generated": "0",
+                  "emitted_http_body": "0",
+                  "app_resources": "released",
+                  "manager_cleanup": "not_asserted"
+                },
+                "connect_target": null
+              }
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 1045,
+            "p2_a": 0,
+            "p2_b": 1045
+          }
+        },
+        {
+          "case_id": "cancel_during_upload/status_cancelled",
+          "pre_state": "CANCELLED",
+          "command": "STATUS",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 262,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 162,
+              "meta_len": 98,
+              "request_id": "32323232323232323232323232323232",
+              "call_seq": "5",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "22222222222222222222222222222222"
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 262,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 737,
+              "meta_len": 673,
+              "request_id": "32323232323232323232323232323232",
+              "call_seq": "5",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "22222222222222222222222222222222",
+              "next_call_seq": "6",
+              "state": "CANCELLED",
+              "error": null,
+              "result": null,
+              "progress": {
+                "accepted_input_bytes": 0,
+                "uploaded_body": "13",
+                "accepted_tls_rx": "0",
+                "emitted_tls_tx": "0",
+                "emitted_http_body": "0",
+                "rx_credit": 0,
+                "net_tx_pending": false,
+                "http_body_pending": false,
+                "need_step": false,
+                "poll_after_ms": 0,
+                "events": [],
+                "terminal": {
+                  "end_reason": "cancelled",
+                  "http_framing": "not_started",
+                  "tls_phase": "not_started",
+                  "close_notify_received": false,
+                  "request_application_bytes_generated": "0",
+                  "emitted_http_body": "0",
+                  "app_resources": "released",
+                  "manager_cleanup": "not_asserted"
+                },
+                "connect_target": null
+              }
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 737,
+            "p2_a": 0,
+            "p2_b": 737
+          }
+        },
+        {
+          "case_id": "cancel_during_upload/cancel_again",
+          "pre_state": "CANCELLED",
+          "command": "CANCEL",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 261,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 178,
+              "meta_len": 114,
+              "request_id": "32323232323232323232323232323232",
+              "call_seq": "6",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "22222222222222222222222222222222",
+              "reason": "user"
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 261,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 737,
+              "meta_len": 673,
+              "request_id": "32323232323232323232323232323232",
+              "call_seq": "6",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "22222222222222222222222222222222",
+              "next_call_seq": "7",
+              "state": "CANCELLED",
+              "error": null,
+              "result": null,
+              "progress": {
+                "accepted_input_bytes": 0,
+                "uploaded_body": "13",
+                "accepted_tls_rx": "0",
+                "emitted_tls_tx": "0",
+                "emitted_http_body": "0",
+                "rx_credit": 0,
+                "net_tx_pending": false,
+                "http_body_pending": false,
+                "need_step": false,
+                "poll_after_ms": 0,
+                "events": [],
+                "terminal": {
+                  "end_reason": "cancelled",
+                  "http_framing": "not_started",
+                  "tls_phase": "not_started",
+                  "close_notify_received": false,
+                  "request_application_bytes_generated": "0",
+                  "emitted_http_body": "0",
+                  "app_resources": "released",
+                  "manager_cleanup": "not_asserted"
+                },
+                "connect_target": null
+              }
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 737,
+            "p2_a": 0,
+            "p2_b": 737
+          }
+        }
+      ]
+    },
+    {
+      "trace_id": "models_http_complete",
+      "independent_scenario": true,
+      "preconditions": [
+        "Independent request scenario; durable fake ref ef...ef version 1 exists.",
+        "MODELS uses empty body, json and HTTP_COMPLETE.",
+        "Synthetic TLS bytes do not establish real server authentication."
+      ],
+      "role": "request",
+      "session_nonce": "23232323232323232323232323232323",
+      "planned_request_id": "33333333333333333333333333333333",
+      "steps": [
+        {
+          "case_id": "models_http_complete/hello",
+          "pre_state": "NEW",
+          "command": "HELLO",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 1,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 162,
+              "meta_len": 98,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "1",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "role": "request",
+              "supported_versions": [
+                {
+                  "major": 1,
+                  "minor": 0
+                }
+              ],
+              "client_name": "lsp-design-fixture"
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 1,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 1065,
+              "meta_len": 1001,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "1",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "23232323232323232323232323232323",
+              "next_call_seq": "2",
+              "state": "HELLO_READY",
+              "error": null,
+              "result": {
+                "selected_version": {
+                  "major": 1,
+                  "minor": 0
+                },
+                "role": "request",
+                "capabilities": {
+                  "operations": [
+                    "CHAT",
+                    "RESPONSES",
+                    "MESSAGES",
+                    "MODELS"
+                  ],
+                  "profiles": [
+                    {
+                      "id": "fixture_deepseek",
+                      "auth_by_operation": {
+                        "CHAT": "bearer",
+                        "RESPONSES": "bearer",
+                        "MESSAGES": "x_api_key",
+                        "MODELS": "bearer"
+                      }
+                    }
+                  ],
+                  "backend_contract_id": "DESIGN-FIXTURE-NOT-A-DEPLOYED-SDK",
+                  "features": [
+                    "bounded_pump",
+                    "business_cancel",
+                    "epoch_bound_sessions",
+                    "temporary_credentials"
+                  ]
+                },
+                "limits": {
+                  "frame_input_max": 16384,
+                  "frame_output_max": 32768,
+                  "json_max": 4096,
+                  "max_request_body": 1048576,
+                  "max_concurrent_requests": 4,
+                  "max_sessions": 8,
+                  "max_pending_net_rx": 65536,
+                  "max_pending_net_tx": 65536,
+                  "max_pending_http_body": 65536,
+                  "upload_idle_ms": 10000,
+                  "lease_ms": 30000,
+                  "heartbeat_max_ms": 2000,
+                  "max_overall_ms": 180000,
+                  "max_header_bytes": 4096,
+                  "max_credential_bytes": 4096,
+                  "max_temporary_ttl_ms": 120000
+                }
+              },
+              "progress": null
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 1065,
+            "p2_a": 0,
+            "p2_b": 1065
+          }
+        },
+        {
+          "case_id": "models_http_complete/open",
+          "pre_state": "HELLO_READY",
+          "command": "REQUEST_OPEN",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 256,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 485,
+              "meta_len": 421,
+              "request_id": "33333333333333333333333333333333",
+              "call_seq": "2",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "23232323232323232323232323232323",
+              "namespace": "fixture_user",
+              "profile_id": "fixture_deepseek",
+              "credential_ref": "efefefefefefefefefefefefefefefef",
+              "expected_version": "1",
+              "operation": "MODELS",
+              "body_length": "0",
+              "overall_timeout_ms": 120000,
+              "response_mode": "json",
+              "completion_policy": "HTTP_COMPLETE",
+              "headers": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ]
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 256,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 506,
+              "meta_len": 442,
+              "request_id": "33333333333333333333333333333333",
+              "call_seq": "2",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "23232323232323232323232323232323",
+              "next_call_seq": "3",
+              "state": "UPLOADING",
+              "error": null,
+              "result": null,
+              "progress": {
+                "accepted_input_bytes": 0,
+                "uploaded_body": "0",
+                "accepted_tls_rx": "0",
+                "emitted_tls_tx": "0",
+                "emitted_http_body": "0",
+                "rx_credit": 0,
+                "net_tx_pending": false,
+                "http_body_pending": false,
+                "need_step": false,
+                "poll_after_ms": 1000,
+                "events": [],
+                "terminal": null,
+                "connect_target": null
+              }
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 506,
+            "p2_a": 0,
+            "p2_b": 506
+          }
+        },
+        {
+          "case_id": "models_http_complete/commit_empty_body",
+          "pre_state": "UPLOADING",
+          "command": "BODY_COMMIT",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 258,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 285,
+              "meta_len": 221,
+              "request_id": "33333333333333333333333333333333",
+              "call_seq": "3",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "23232323232323232323232323232323",
+              "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "net_tx_credit": 4096,
+              "app_rx_credit": 8192
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 258,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 718,
+              "meta_len": 629,
+              "request_id": "33333333333333333333333333333333",
+              "call_seq": "3",
+              "status": 0,
+              "payload_len": 25,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "23232323232323232323232323232323",
+              "next_call_seq": "4",
+              "state": "HANDSHAKING",
+              "error": null,
+              "result": null,
+              "progress": {
+                "accepted_input_bytes": 0,
+                "uploaded_body": "0",
+                "accepted_tls_rx": "0",
+                "emitted_tls_tx": "25",
+                "emitted_http_body": "0",
+                "rx_credit": 4096,
+                "net_tx_pending": false,
+                "http_body_pending": false,
+                "need_step": false,
+                "poll_after_ms": 1000,
+                "events": [
+                  {
+                    "event_seq": "1",
+                    "kind": "NET_TX",
+                    "offset": 0,
+                    "length": 25,
+                    "stream_offset": "0",
+                    "may_contain_request": false
+                  }
+                ],
+                "terminal": null,
+                "connect_target": {
+                  "host": "api.example.test",
+                  "port": 443,
+                  "sni": "api.example.test",
+                  "alpn": "http/1.1"
+                }
+              }
+            },
+            "payload_hex": "4e4f542d5245414c2d544c532d434c49454e542d48454c4c4f"
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 718,
+            "p2_a": 0,
+            "p2_b": 718
+          }
+        },
+        {
+          "case_id": "models_http_complete/receive_handshake",
+          "pre_state": "HANDSHAKING",
+          "command": "STEP",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 259,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 275,
+              "meta_len": 182,
+              "request_id": "33333333333333333333333333333333",
+              "call_seq": "4",
+              "status": 0,
+              "payload_len": 29,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "23232323232323232323232323232323",
+              "input_kind": "tls_rx",
+              "tls_rx_offset": "0",
+              "net_tx_credit": 4096,
+              "app_rx_credit": 8192
+            },
+            "payload_hex": "4e4f542d5245414c2d544c532d5345525645522d48414e445348414b45"
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 259,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 644,
+              "meta_len": 553,
+              "request_id": "33333333333333333333333333333333",
+              "call_seq": "4",
+              "status": 0,
+              "payload_len": 27,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "23232323232323232323232323232323",
+              "next_call_seq": "5",
+              "state": "EXCHANGING",
+              "error": null,
+              "result": null,
+              "progress": {
+                "accepted_input_bytes": 29,
+                "uploaded_body": "0",
+                "accepted_tls_rx": "29",
+                "emitted_tls_tx": "52",
+                "emitted_http_body": "0",
+                "rx_credit": 4096,
+                "net_tx_pending": false,
+                "http_body_pending": false,
+                "need_step": false,
+                "poll_after_ms": 1000,
+                "events": [
+                  {
+                    "event_seq": "2",
+                    "kind": "NET_TX",
+                    "offset": 0,
+                    "length": 27,
+                    "stream_offset": "25",
+                    "may_contain_request": true
+                  }
+                ],
+                "terminal": null,
+                "connect_target": null
+              }
+            },
+            "payload_hex": "4e4f542d5245414c2d544c532d524551554553542d5245434f5244"
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 644,
+            "p2_a": 0,
+            "p2_b": 644
+          }
+        },
+        {
+          "case_id": "models_http_complete/receive_complete_http",
+          "pre_state": "EXCHANGING",
+          "command": "STEP",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 259,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 275,
+              "meta_len": 183,
+              "request_id": "33333333333333333333333333333333",
+              "call_seq": "5",
+              "status": 0,
+              "payload_len": 28,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "23232323232323232323232323232323",
+              "input_kind": "tls_rx",
+              "tls_rx_offset": "29",
+              "net_tx_credit": 4096,
+              "app_rx_credit": 8192
+            },
+            "payload_hex": "4e4f542d5245414c2d544c532d524553504f4e53452d5245434f5244"
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 259,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 970,
+              "meta_len": 703,
+              "request_id": "33333333333333333333333333333333",
+              "call_seq": "5",
+              "status": 0,
+              "payload_len": 203,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "23232323232323232323232323232323",
+              "next_call_seq": "6",
+              "state": "HTTP_COMPLETE",
+              "error": null,
+              "result": null,
+              "progress": {
+                "accepted_input_bytes": 28,
+                "uploaded_body": "0",
+                "accepted_tls_rx": "57",
+                "emitted_tls_tx": "52",
+                "emitted_http_body": "87",
+                "rx_credit": 0,
+                "net_tx_pending": false,
+                "http_body_pending": false,
+                "need_step": false,
+                "poll_after_ms": 1000,
+                "events": [
+                  {
+                    "event_seq": "3",
+                    "kind": "HTTP_HEAD",
+                    "offset": 0,
+                    "length": 116
+                  },
+                  {
+                    "event_seq": "4",
+                    "kind": "HTTP_BODY",
+                    "offset": 116,
+                    "length": 87,
+                    "stream_offset": "0"
+                  },
+                  {
+                    "event_seq": "5",
+                    "kind": "HTTP_END",
+                    "offset": 203,
+                    "length": 0,
+                    "details": {
+                      "framing": "complete",
+                      "body_bytes": "87"
+                    }
+                  }
+                ],
+                "terminal": null,
+                "connect_target": null
+              }
+            },
+            "payload_hex": "7b22737461747573223a3230302c2268656164657273223a5b7b226e616d65223a22636f6e74656e742d74797065222c2276616c7565223a226170706c69636174696f6e2f6a736f6e227d2c7b226e616d65223a22636f6e74656e742d6c656e677468222c2276616c7565223a223837227d5d7d7b226f626a656374223a226c697374222c2264617461223a5b7b226964223a22666978747572652d6d6f64656c222c226f626a656374223a226d6f64656c222c226f776e65645f6279223a2266697874757265227d5d7d"
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 970,
+            "p2_a": 0,
+            "p2_b": 970
+          }
+        },
+        {
+          "case_id": "models_http_complete/finish_consumed",
+          "pre_state": "HTTP_COMPLETE",
+          "command": "FINISH",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 260,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 191,
+              "meta_len": 127,
+              "request_id": "33333333333333333333333333333333",
+              "call_seq": "6",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "23232323232323232323232323232323",
+              "reason": "response_consumed"
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 260,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 1059,
+              "meta_len": 995,
+              "request_id": "33333333333333333333333333333333",
+              "call_seq": "6",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "23232323232323232323232323232323",
+              "next_call_seq": "7",
+              "state": "ENDED",
+              "error": null,
+              "result": null,
+              "progress": {
+                "accepted_input_bytes": 0,
+                "uploaded_body": "0",
+                "accepted_tls_rx": "57",
+                "emitted_tls_tx": "52",
+                "emitted_http_body": "87",
+                "rx_credit": 0,
+                "net_tx_pending": false,
+                "http_body_pending": false,
+                "need_step": false,
+                "poll_after_ms": 0,
+                "events": [
+                  {
+                    "event_seq": "6",
+                    "kind": "REQUEST_END",
+                    "offset": 0,
+                    "length": 0,
+                    "details": {
+                      "end_reason": "response_consumed",
+                      "http_framing": "complete",
+                      "tls_phase": "application",
+                      "close_notify_received": false,
+                      "request_application_bytes_generated": "128",
+                      "emitted_http_body": "87",
+                      "app_resources": "released",
+                      "manager_cleanup": "not_asserted"
+                    }
+                  }
+                ],
+                "terminal": {
+                  "end_reason": "response_consumed",
+                  "http_framing": "complete",
+                  "tls_phase": "application",
+                  "close_notify_received": false,
+                  "request_application_bytes_generated": "128",
+                  "emitted_http_body": "87",
+                  "app_resources": "released",
+                  "manager_cleanup": "not_asserted"
+                },
+                "connect_target": null
+              }
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 1059,
+            "p2_a": 0,
+            "p2_b": 1059
+          }
+        }
+      ]
+    },
+    {
+      "trace_id": "status_before_open",
+      "independent_scenario": true,
+      "preconditions": [
+        "Independent request scenario; request ID is planned but not bound before OPEN.",
+        "Durable fake ref fa...fa version 1 exists for the later OPEN."
+      ],
+      "role": "request",
+      "session_nonce": "24242424242424242424242424242424",
+      "planned_request_id": "34343434343434343434343434343434",
+      "steps": [
+        {
+          "case_id": "status_before_open/hello",
+          "pre_state": "NEW",
+          "command": "HELLO",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 1,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 162,
+              "meta_len": 98,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "1",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "role": "request",
+              "supported_versions": [
+                {
+                  "major": 1,
+                  "minor": 0
+                }
+              ],
+              "client_name": "lsp-design-fixture"
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 1,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 1065,
+              "meta_len": 1001,
+              "request_id": "00000000000000000000000000000000",
+              "call_seq": "1",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "24242424242424242424242424242424",
+              "next_call_seq": "2",
+              "state": "HELLO_READY",
+              "error": null,
+              "result": {
+                "selected_version": {
+                  "major": 1,
+                  "minor": 0
+                },
+                "role": "request",
+                "capabilities": {
+                  "operations": [
+                    "CHAT",
+                    "RESPONSES",
+                    "MESSAGES",
+                    "MODELS"
+                  ],
+                  "profiles": [
+                    {
+                      "id": "fixture_deepseek",
+                      "auth_by_operation": {
+                        "CHAT": "bearer",
+                        "RESPONSES": "bearer",
+                        "MESSAGES": "x_api_key",
+                        "MODELS": "bearer"
+                      }
+                    }
+                  ],
+                  "backend_contract_id": "DESIGN-FIXTURE-NOT-A-DEPLOYED-SDK",
+                  "features": [
+                    "bounded_pump",
+                    "business_cancel",
+                    "epoch_bound_sessions",
+                    "temporary_credentials"
+                  ]
+                },
+                "limits": {
+                  "frame_input_max": 16384,
+                  "frame_output_max": 32768,
+                  "json_max": 4096,
+                  "max_request_body": 1048576,
+                  "max_concurrent_requests": 4,
+                  "max_sessions": 8,
+                  "max_pending_net_rx": 65536,
+                  "max_pending_net_tx": 65536,
+                  "max_pending_http_body": 65536,
+                  "upload_idle_ms": 10000,
+                  "lease_ms": 30000,
+                  "heartbeat_max_ms": 2000,
+                  "max_overall_ms": 180000,
+                  "max_header_bytes": 4096,
+                  "max_credential_bytes": 4096,
+                  "max_temporary_ttl_ms": 120000
+                }
+              },
+              "progress": null
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 1065,
+            "p2_a": 0,
+            "p2_b": 1065
+          }
+        },
+        {
+          "case_id": "status_before_open/status_before_binding",
+          "pre_state": "HELLO_READY",
+          "command": "STATUS",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 262,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 162,
+              "meta_len": 98,
+              "request_id": "34343434343434343434343434343434",
+              "call_seq": "2",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "24242424242424242424242424242424"
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 262,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 291,
+              "meta_len": 227,
+              "request_id": "34343434343434343434343434343434",
+              "call_seq": "2",
+              "status": 4353,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "24242424242424242424242424242424",
+              "next_call_seq": "3",
+              "state": "HELLO_READY",
+              "error": {
+                "code": "E_STATE",
+                "stage": "open",
+                "retry": "none"
+              },
+              "result": null,
+              "progress": null
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 291,
+            "p2_a": 4353,
+            "p2_b": 291
+          },
+          "annotations": {
+            "nonzero_header_request_id_is_valid_shape": true,
+            "request_id_is_not_bound_by_status": true,
+            "call_seq_is_consumed": true
+          }
+        },
+        {
+          "case_id": "status_before_open/open_after_error",
+          "pre_state": "HELLO_READY",
+          "command": "REQUEST_OPEN",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 256,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 485,
+              "meta_len": 421,
+              "request_id": "34343434343434343434343434343434",
+              "call_seq": "3",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "24242424242424242424242424242424",
+              "namespace": "fixture_user",
+              "profile_id": "fixture_deepseek",
+              "credential_ref": "fafafafafafafafafafafafafafafafa",
+              "expected_version": "1",
+              "operation": "MODELS",
+              "body_length": "0",
+              "overall_timeout_ms": 120000,
+              "response_mode": "json",
+              "completion_policy": "HTTP_COMPLETE",
+              "headers": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/json"
+                }
+              ]
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 256,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 506,
+              "meta_len": 442,
+              "request_id": "34343434343434343434343434343434",
+              "call_seq": "3",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "24242424242424242424242424242424",
+              "next_call_seq": "4",
+              "state": "UPLOADING",
+              "error": null,
+              "result": null,
+              "progress": {
+                "accepted_input_bytes": 0,
+                "uploaded_body": "0",
+                "accepted_tls_rx": "0",
+                "emitted_tls_tx": "0",
+                "emitted_http_body": "0",
+                "rx_credit": 0,
+                "net_tx_pending": false,
+                "http_body_pending": false,
+                "need_step": false,
+                "poll_after_ms": 1000,
+                "events": [],
+                "terminal": null,
+                "connect_target": null
+              }
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 506,
+            "p2_a": 0,
+            "p2_b": 506
+          }
+        },
+        {
+          "case_id": "status_before_open/cancel_without_network",
+          "pre_state": "UPLOADING",
+          "command": "CANCEL",
+          "request": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 261,
+              "flags": 0,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 182,
+              "meta_len": 118,
+              "request_id": "34343434343434343434343434343434",
+              "call_seq": "4",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "24242424242424242424242424242424",
+              "reason": "shutdown"
+            },
+            "payload_hex": ""
+          },
+          "reply": {
+            "header": {
+              "magic": "LSP1",
+              "major": 1,
+              "minor": 0,
+              "opcode": 261,
+              "flags": 1,
+              "header_len": 64,
+              "reserved0": 0,
+              "frame_len": 1044,
+              "meta_len": 980,
+              "request_id": "34343434343434343434343434343434",
+              "call_seq": "4",
+              "status": 0,
+              "payload_len": 0,
+              "reserved1": "0"
+            },
+            "metadata": {
+              "ta_epoch": "0123456789abcdeffedcba9876543210",
+              "session_nonce": "24242424242424242424242424242424",
+              "next_call_seq": "5",
+              "state": "CANCELLED",
+              "error": null,
+              "result": null,
+              "progress": {
+                "accepted_input_bytes": 0,
+                "uploaded_body": "0",
+                "accepted_tls_rx": "0",
+                "emitted_tls_tx": "0",
+                "emitted_http_body": "0",
+                "rx_credit": 0,
+                "net_tx_pending": false,
+                "http_body_pending": false,
+                "need_step": false,
+                "poll_after_ms": 0,
+                "events": [
+                  {
+                    "event_seq": "1",
+                    "kind": "REQUEST_END",
+                    "offset": 0,
+                    "length": 0,
+                    "details": {
+                      "end_reason": "cancelled",
+                      "http_framing": "not_started",
+                      "tls_phase": "not_started",
+                      "close_notify_received": false,
+                      "request_application_bytes_generated": "0",
+                      "emitted_http_body": "0",
+                      "app_resources": "released",
+                      "manager_cleanup": "not_asserted"
+                    }
+                  }
+                ],
+                "terminal": {
+                  "end_reason": "cancelled",
+                  "http_framing": "not_started",
+                  "tls_phase": "not_started",
+                  "close_notify_received": false,
+                  "request_application_bytes_generated": "0",
+                  "emitted_http_body": "0",
+                  "app_resources": "released",
+                  "manager_cleanup": "not_asserted"
+                },
+                "connect_target": null
+              }
+            },
+            "payload_hex": ""
+          },
+          "gp_reply": {
+            "teec_result": 0,
+            "p1_size": 1044,
+            "p2_a": 0,
+            "p2_b": 1044
+          }
+        }
+      ]
+    }
+  ],
+  "protocol_source_snapshot": "../../artifacts/design-preflight-20261112/business-examples-spec-snapshot.md"
+}

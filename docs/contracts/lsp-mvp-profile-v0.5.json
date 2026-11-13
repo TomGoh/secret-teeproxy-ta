@@ -1,0 +1,22 @@
+{
+  "profile_version": "0.5",
+  "status": "implementation_baseline_not_device_acceptance",
+  "protocol": "LSP/1.0",
+  "ta_uuid": "c86d23b9-e568-509e-a9b2-0ad40668caf5",
+  "gp_command": 4096,
+  "gp_param_types": 613,
+  "supported_operations": ["CHAT", "MODELS"],
+  "provider_profile": "deepseek-prod-v1",
+  "model": "deepseek-flash",
+  "endpoint": {"cid_source": "observed_current_AVF_VM", "port": 10099},
+  "max_concurrent_requests": 1,
+  "concurrency_expansion_reserved": true,
+  "second_request_behavior": "E_BUSY_without_modifying_active_request",
+  "android_ca_form": "APK_runtime_native_library",
+  "primary_entry": "SystemAiManager.submitCloudRaw",
+  "key_backend": "TA_persistent_storage",
+  "fallback_to_android_key": false,
+  "automatic_generation_replay": false,
+  "guest": {"protected_required": true, "memory_mib": 1024, "cpu_topology": "one_cpu"},
+  "note": "The CID and higher concurrency values in earlier broad design examples are not the MVP runtime configuration. Only the observed VM CID is usable."
+}

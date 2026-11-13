@@ -1,0 +1,2504 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:magicsmooth:lsp:ca-local-contract:1",
+  "title": "MagicSmooth process-local CA functional JSON contract v1",
+  "description": "Design contract only. Local ABI JSON, not LSP wire; additional runtime/buffer/sequence checks documented separately. Identity enhancement is deferred.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/runtimeConfig"
+    },
+    {
+      "$ref": "#/$defs/requestMetadata"
+    },
+    {
+      "$ref": "#/$defs/putMetadata"
+    },
+    {
+      "$ref": "#/$defs/queryMetadata"
+    },
+    {
+      "$ref": "#/$defs/deleteMetadata"
+    },
+    {
+      "$ref": "#/$defs/probeMetadata"
+    },
+    {
+      "$ref": "#/$defs/responseHeadEvent"
+    },
+    {
+      "$ref": "#/$defs/bodyEvent"
+    },
+    {
+      "$ref": "#/$defs/credentialResultEvent"
+    },
+    {
+      "$ref": "#/$defs/probeResultEvent"
+    },
+    {
+      "$ref": "#/$defs/terminalEvent"
+    }
+  ],
+  "$defs": {
+    "u64": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20,
+      "pattern": "^(?:0|[1-9][0-9]{0,18}|1[0-7][0-9]{18}|18[0-3][0-9]{17}|184[0-3][0-9]{16}|1844[0-5][0-9]{15}|18446[0-6][0-9]{14}|184467[0-3][0-9]{13}|1844674[0-3][0-9]{12}|184467440[0-6][0-9]{10}|1844674407[0-2][0-9]{9}|18446744073[0-6][0-9]{8}|1844674407370[0-8][0-9]{6}|18446744073709[0-4][0-9]{5}|184467440737095[0-4][0-9]{4}|18446744073709550[0-9]{3}|18446744073709551[0-5][0-9]{2}|1844674407370955160[0-9]{1}|1844674407370955161[0-4]|18446744073709551615)$"
+    },
+    "u64Positive": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/u64"
+        },
+        {
+          "not": {
+            "const": "0"
+          }
+        }
+      ]
+    },
+    "hex128": {
+      "type": "string",
+      "minLength": 32,
+      "maxLength": 32,
+      "pattern": "^[0-9a-f]{32}$"
+    },
+    "identifier": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9._-]+$"
+    },
+    "correlationId": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9._:-]+$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "noControls": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 4096,
+      "pattern": "^[^\\u0000\\r\\n]*$"
+    },
+    "headerName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[!#$%&'*+\\-.^_`|~0-9A-Za-z]+$"
+    },
+    "responseHeader": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/headerName"
+        },
+        "value": {
+          "$ref": "#/$defs/noControls"
+        }
+      },
+      "required": [
+        "name",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "inputHeader": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/headerName"
+            },
+            {
+              "not": {
+                "pattern": "^(?:[Hh][Oo][Ss][Tt]|[Aa][Uu][Tt][Hh][Oo][Rr][Ii][Zz][Aa][Tt][Ii][Oo][Nn]|[Xx]\\-[Aa][Pp][Ii]\\-[Kk][Ee][Yy]|[Cc][Oo][Nn][Tt][Ee][Nn][Tt]\\-[Ll][Ee][Nn][Gg][Tt][Hh]|[Tt][Rr][Aa][Nn][Ss][Ff][Ee][Rr]\\-[Ee][Nn][Cc][Oo][Dd][Ii][Nn][Gg]|[Cc][Oo][Nn][Nn][Ee][Cc][Tt][Ii][Oo][Nn]|[Pp][Rr][Oo][Xx][Yy]\\-.*|[Xx]\\-[Gg][Oo][Oo][Gg]\\-[Aa][Pp][Ii]\\-[Kk][Ee][Yy]|[Aa][Nn][Tt][Hh][Rr][Oo][Pp][Ii][Cc]\\-[Vv][Ee][Rr][Ss][Ii][Oo][Nn])$"
+              }
+            }
+          ]
+        },
+        "value": {
+          "$ref": "#/$defs/noControls"
+        }
+      },
+      "required": [
+        "name",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "operation": {
+      "type": "string",
+      "enum": [
+        "CHAT",
+        "RESPONSES",
+        "MESSAGES",
+        "GENERATE",
+        "OLLAMA_CHAT",
+        "MODELS"
+      ]
+    },
+    "runtimeHandle": {
+      "type": "object",
+      "properties": {
+        "process_epoch_hi": {
+          "$ref": "#/$defs/u64"
+        },
+        "process_epoch_lo": {
+          "$ref": "#/$defs/u64"
+        },
+        "runtime_generation": {
+          "$ref": "#/$defs/u64Positive"
+        }
+      },
+      "required": [
+        "process_epoch_hi",
+        "process_epoch_lo",
+        "runtime_generation"
+      ],
+      "additionalProperties": false
+    },
+    "operationHandle": {
+      "type": "object",
+      "properties": {
+        "owner": {
+          "$ref": "#/$defs/runtimeHandle"
+        },
+        "slot": {
+          "$ref": "#/$defs/u64"
+        },
+        "generation": {
+          "$ref": "#/$defs/u64Positive"
+        }
+      },
+      "required": [
+        "owner",
+        "slot",
+        "generation"
+      ],
+      "additionalProperties": false
+    },
+    "resources": {
+      "type": "object",
+      "properties": {
+        "max_request_workers": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "max_queued_requests": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 128
+        },
+        "max_queued_management": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 128
+        },
+        "max_operation_records": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1024
+        },
+        "max_request_body_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 67108864
+        },
+        "max_native_retained_bytes": {
+          "type": "integer",
+          "minimum": 131072,
+          "maximum": 536870912
+        },
+        "net_rx_bytes_per_request": {
+          "type": "integer",
+          "minimum": 16384,
+          "maximum": 1048576
+        },
+        "net_tx_bytes_per_request": {
+          "type": "integer",
+          "minimum": 32768,
+          "maximum": 1048576
+        },
+        "app_rx_bytes_per_request": {
+          "type": "integer",
+          "minimum": 16384,
+          "maximum": 4194304
+        },
+        "max_event_metadata_bytes": {
+          "type": "integer",
+          "minimum": 4096,
+          "maximum": 65536
+        },
+        "max_event_body_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65536
+        },
+        "max_credential_bytes": {
+          "const": 4096
+        },
+        "max_pending_java_events_per_operation": {
+          "const": 1
+        },
+        "max_request_body_reservation_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 268435456
+        }
+      },
+      "required": [
+        "max_request_workers",
+        "max_queued_requests",
+        "max_queued_management",
+        "max_operation_records",
+        "max_request_body_bytes",
+        "max_native_retained_bytes",
+        "net_rx_bytes_per_request",
+        "net_tx_bytes_per_request",
+        "app_rx_bytes_per_request",
+        "max_event_metadata_bytes",
+        "max_event_body_bytes",
+        "max_credential_bytes",
+        "max_pending_java_events_per_operation",
+        "max_request_body_reservation_bytes"
+      ],
+      "additionalProperties": false
+    },
+    "timeouts": {
+      "type": "object",
+      "properties": {
+        "default_overall_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        },
+        "max_overall_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        },
+        "sdk_connect_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        },
+        "sdk_handshake_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        },
+        "sdk_call_budget_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        },
+        "sdk_connect_open_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        },
+        "sdk_graceful_close_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        },
+        "worker_reap_grace_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        },
+        "network_connect_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        },
+        "network_idle_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        },
+        "upload_idle_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        },
+        "heartbeat_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        },
+        "consumer_idle_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        },
+        "event_ack_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        },
+        "max_read_wait_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60000
+        },
+        "cleanup_observe_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60000
+        },
+        "default_temporary_ttl_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        },
+        "max_temporary_ttl_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        }
+      },
+      "required": [
+        "default_overall_ms",
+        "max_overall_ms",
+        "sdk_connect_ms",
+        "sdk_handshake_ms",
+        "sdk_call_budget_ms",
+        "sdk_connect_open_ms",
+        "sdk_graceful_close_ms",
+        "worker_reap_grace_ms",
+        "network_connect_ms",
+        "network_idle_ms",
+        "upload_idle_ms",
+        "heartbeat_ms",
+        "consumer_idle_ms",
+        "event_ack_ms",
+        "max_read_wait_ms",
+        "cleanup_observe_ms",
+        "default_temporary_ttl_ms",
+        "max_temporary_ttl_ms"
+      ],
+      "additionalProperties": false
+    },
+    "runtimeConfig": {
+      "type": "object",
+      "properties": {
+        "document_type": {
+          "const": "runtime_config"
+        },
+        "contract_version": {
+          "const": 1
+        },
+        "sdk_profile": {
+          "$ref": "#/$defs/identifier"
+        },
+        "required_backend_contract_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[\\x20-\\x7e]+$"
+        },
+        "endpoint": {
+          "type": "object",
+          "properties": {
+            "cid": {
+              "type": "integer",
+              "minimum": 3,
+              "maximum": 4294967294
+            },
+            "port": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4294967294
+            }
+          },
+          "required": [
+            "cid",
+            "port"
+          ],
+          "additionalProperties": false
+        },
+        "resources": {
+          "$ref": "#/$defs/resources"
+        },
+        "timeouts": {
+          "$ref": "#/$defs/timeouts"
+        },
+        "profiles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/identifier"
+          },
+          "maxItems": 16,
+          "uniqueItems": true,
+          "minItems": 1
+        }
+      },
+      "required": [
+        "document_type",
+        "contract_version",
+        "sdk_profile",
+        "required_backend_contract_id",
+        "endpoint",
+        "resources",
+        "timeouts",
+        "profiles"
+      ],
+      "additionalProperties": false
+    },
+    "requestMetadata": {
+      "type": "object",
+      "properties": {
+        "document_type": {
+          "const": "request"
+        },
+        "contract_version": {
+          "const": 1
+        },
+        "correlation_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9._:-]+$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "namespace": {
+          "$ref": "#/$defs/identifier"
+        },
+        "profile_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "credential_ref": {
+          "$ref": "#/$defs/hex128"
+        },
+        "expected_version": {
+          "$ref": "#/$defs/u64"
+        },
+        "operation": {
+          "$ref": "#/$defs/operation"
+        },
+        "response_mode": {
+          "type": "string",
+          "enum": [
+            "json",
+            "sse",
+            "ndjson"
+          ]
+        },
+        "completion_policy": {
+          "type": "string",
+          "enum": [
+            "HTTP_COMPLETE",
+            "MODEL_TERMINAL"
+          ],
+          "default": "HTTP_COMPLETE"
+        },
+        "overall_timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        },
+        "headers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/inputHeader"
+          },
+          "maxItems": 32,
+          "default": []
+        },
+        "model_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "document_type",
+        "contract_version",
+        "namespace",
+        "profile_id",
+        "credential_ref",
+        "expected_version",
+        "operation",
+        "response_mode"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "response_mode": {
+                "const": "json"
+              }
+            },
+            "required": [
+              "response_mode"
+            ]
+          },
+          "then": {
+            "properties": {
+              "completion_policy": {
+                "const": "HTTP_COMPLETE"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "MODELS"
+              }
+            },
+            "required": [
+              "operation"
+            ]
+          },
+          "then": {
+            "properties": {
+              "response_mode": {
+                "const": "json"
+              },
+              "completion_policy": {
+                "const": "HTTP_COMPLETE"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "GENERATE"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "model_id"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "model_id"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "response_mode": {
+                "const": "ndjson"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "operation": {
+                "const": "OLLAMA_CHAT"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "OLLAMA_CHAT"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "response_mode": {
+                "enum": [
+                  "json",
+                  "ndjson"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "putMetadata": {
+      "type": "object",
+      "properties": {
+        "document_type": {
+          "const": "credential_put"
+        },
+        "contract_version": {
+          "const": 1
+        },
+        "correlation_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9._:-]+$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "namespace": {
+          "$ref": "#/$defs/identifier"
+        },
+        "credential_ref": {
+          "$ref": "#/$defs/hex128"
+        },
+        "operation_id": {
+          "$ref": "#/$defs/hex128"
+        },
+        "profile_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "expected_version": {
+          "$ref": "#/$defs/u64"
+        },
+        "temporary": {
+          "type": "boolean",
+          "default": false
+        },
+        "ttl_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        },
+        "overall_timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        },
+        "provider_config": {
+          "$ref": "#/$defs/providerConfig"
+        },
+        "reuse_existing_key": {
+          "type": "boolean",
+          "default": false,
+          "description": "With true, payload is empty and CAS reuses the live existing Key inside TA."
+        }
+      },
+      "required": [
+        "document_type",
+        "contract_version",
+        "namespace",
+        "credential_ref",
+        "operation_id",
+        "profile_id",
+        "expected_version"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "temporary": {
+                "const": true
+              }
+            },
+            "required": [
+              "temporary"
+            ]
+          },
+          "then": {
+            "required": [
+              "ttl_ms"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "ttl_ms"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "queryMetadata": {
+      "type": "object",
+      "properties": {
+        "document_type": {
+          "const": "credential_query"
+        },
+        "contract_version": {
+          "const": 1
+        },
+        "correlation_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9._:-]+$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "namespace": {
+          "$ref": "#/$defs/identifier"
+        },
+        "credential_ref": {
+          "$ref": "#/$defs/hex128"
+        },
+        "overall_timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        }
+      },
+      "required": [
+        "document_type",
+        "contract_version",
+        "namespace",
+        "credential_ref"
+      ],
+      "additionalProperties": false
+    },
+    "deleteMetadata": {
+      "type": "object",
+      "properties": {
+        "document_type": {
+          "const": "credential_delete"
+        },
+        "contract_version": {
+          "const": 1
+        },
+        "correlation_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9._:-]+$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "namespace": {
+          "$ref": "#/$defs/identifier"
+        },
+        "credential_ref": {
+          "$ref": "#/$defs/hex128"
+        },
+        "operation_id": {
+          "$ref": "#/$defs/hex128"
+        },
+        "expected_version": {
+          "$ref": "#/$defs/u64"
+        },
+        "overall_timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        }
+      },
+      "required": [
+        "document_type",
+        "contract_version",
+        "namespace",
+        "credential_ref",
+        "operation_id",
+        "expected_version"
+      ],
+      "additionalProperties": false
+    },
+    "probeMetadata": {
+      "type": "object",
+      "properties": {
+        "document_type": {
+          "const": "probe"
+        },
+        "contract_version": {
+          "const": 1
+        },
+        "correlation_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[A-Za-z0-9._:-]+$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "overall_timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        }
+      },
+      "required": [
+        "document_type",
+        "contract_version"
+      ],
+      "additionalProperties": false
+    },
+    "receipt": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "$ref": "#/$defs/hex128"
+        },
+        "operation": {
+          "type": "string",
+          "enum": [
+            "put",
+            "delete"
+          ]
+        },
+        "committed_version": {
+          "$ref": "#/$defs/u64"
+        }
+      },
+      "required": [
+        "operation_id",
+        "operation",
+        "committed_version"
+      ],
+      "additionalProperties": false
+    },
+    "credentialResult": {
+      "type": "object",
+      "properties": {
+        "credential_ref": {
+          "$ref": "#/$defs/hex128"
+        },
+        "namespace": {
+          "$ref": "#/$defs/identifier"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "absent",
+            "live",
+            "deleted",
+            "expired"
+          ]
+        },
+        "version": {
+          "$ref": "#/$defs/u64"
+        },
+        "profile_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/identifier"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "temporary": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "ttl_remaining_ms": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "receipt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/receipt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "replayed": {
+          "type": "boolean"
+        },
+        "provider_config": {
+          "$ref": "#/$defs/providerConfig"
+        }
+      },
+      "required": [
+        "credential_ref",
+        "namespace",
+        "state",
+        "version",
+        "profile_id",
+        "temporary",
+        "ttl_remaining_ms",
+        "receipt",
+        "replayed"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "absent"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "version": {
+                "const": "0"
+              },
+              "profile_id": {
+                "const": null
+              },
+              "temporary": {
+                "const": null
+              },
+              "ttl_remaining_ms": {
+                "const": null
+              },
+              "receipt": {
+                "const": null
+              },
+              "replayed": {
+                "const": false
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "profile_id": {
+                "$ref": "#/$defs/identifier"
+              },
+              "temporary": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "temporary": {
+                "const": false
+              }
+            },
+            "required": [
+              "temporary"
+            ]
+          },
+          "then": {
+            "properties": {
+              "ttl_remaining_ms": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "backendLimits": {
+      "type": "object",
+      "properties": {
+        "frame_input_max": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "frame_output_max": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "json_max": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "max_request_body": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "max_concurrent_requests": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "max_sessions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "max_pending_net_rx": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "max_pending_net_tx": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "max_pending_http_body": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "upload_idle_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "lease_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "heartbeat_max_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "max_overall_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "max_header_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "max_credential_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "max_temporary_ttl_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "max_body_reservation_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        }
+      },
+      "required": [
+        "frame_input_max",
+        "frame_output_max",
+        "json_max",
+        "max_request_body",
+        "max_concurrent_requests",
+        "max_sessions",
+        "max_pending_net_rx",
+        "max_pending_net_tx",
+        "max_pending_http_body",
+        "upload_idle_ms",
+        "lease_ms",
+        "heartbeat_max_ms",
+        "max_overall_ms",
+        "max_header_bytes",
+        "max_credential_bytes",
+        "max_temporary_ttl_ms"
+      ],
+      "additionalProperties": false
+    },
+    "profileCapability": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "auth_by_operation": {
+          "type": "object",
+          "properties": {
+            "CHAT": {
+              "type": "string",
+              "enum": [
+                "bearer",
+                "x_api_key"
+              ]
+            },
+            "RESPONSES": {
+              "type": "string",
+              "enum": [
+                "bearer",
+                "x_api_key"
+              ]
+            },
+            "MESSAGES": {
+              "type": "string",
+              "enum": [
+                "bearer",
+                "x_api_key"
+              ]
+            },
+            "MODELS": {
+              "type": "string",
+              "enum": [
+                "bearer",
+                "x_api_key"
+              ]
+            },
+            "GENERATE": {
+              "enum": [
+                "x_goog_api_key"
+              ]
+            },
+            "OLLAMA_CHAT": {
+              "enum": [
+                "bearer"
+              ]
+            }
+          },
+          "required": [],
+          "additionalProperties": false,
+          "minProperties": 1
+        },
+        "provider_types": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/providerType"
+          }
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": [
+            "auth_by_operation"
+          ]
+        },
+        {
+          "required": [
+            "provider_types"
+          ]
+        }
+      ]
+    },
+    "backendHelloResult": {
+      "type": "object",
+      "properties": {
+        "selected_version": {
+          "type": "object",
+          "properties": {
+            "major": {
+              "const": 1
+            },
+            "minor": {
+              "const": 0
+            }
+          },
+          "required": [
+            "major",
+            "minor"
+          ],
+          "additionalProperties": false
+        },
+        "role": {
+          "enum": [
+            "request",
+            "management"
+          ]
+        },
+        "capabilities": {
+          "type": "object",
+          "properties": {
+            "operations": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/operation"
+              },
+              "maxItems": 6,
+              "uniqueItems": true
+            },
+            "profiles": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/profileCapability"
+              },
+              "maxItems": 16,
+              "uniqueItems": true
+            },
+            "backend_contract_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[\\x20-\\x7e]+$"
+            },
+            "features": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "bounded_pump",
+                  "business_cancel",
+                  "epoch_bound_sessions",
+                  "temporary_credentials",
+                  "provider_configuration",
+                  "concurrent_requests",
+                  "credential_rebind"
+                ]
+              },
+              "maxItems": 7,
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "operations",
+            "profiles",
+            "backend_contract_id",
+            "features"
+          ],
+          "additionalProperties": false
+        },
+        "limits": {
+          "$ref": "#/$defs/backendLimits"
+        }
+      },
+      "required": [
+        "selected_version",
+        "role",
+        "capabilities",
+        "limits"
+      ],
+      "additionalProperties": false
+    },
+    "sdkTransport": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "not_started",
+            "ok",
+            "error",
+            "unknown"
+          ]
+        },
+        "phase": {
+          "type": "string",
+          "enum": [
+            "none",
+            "connect",
+            "handshake",
+            "open",
+            "invoke",
+            "close",
+            "finalize",
+            "abort"
+          ]
+        },
+        "result": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "origin": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "enum": [
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "state",
+        "phase",
+        "result",
+        "origin"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "not_started"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "phase": {
+                "const": "none"
+              },
+              "result": {
+                "type": "null"
+              },
+              "origin": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "ok"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "result": {
+                "const": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    "lspSnapshot": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "integer",
+          "enum": [
+            0,
+            4097,
+            4098,
+            4099,
+            4100,
+            4353,
+            4354,
+            4355,
+            4356,
+            4609,
+            4610,
+            4611,
+            4612,
+            4613,
+            4614,
+            4615,
+            4865,
+            4866,
+            4867,
+            4868,
+            4869,
+            5121,
+            5122,
+            5123,
+            5124,
+            5125,
+            8191
+          ]
+        },
+        "name": {
+          "type": "string",
+          "enum": [
+            "OK",
+            "E_OUTPUT_CAPACITY",
+            "E_WIRE_FORMAT",
+            "E_VERSION",
+            "E_ROLE",
+            "E_STATE",
+            "E_STALE_EPOCH",
+            "E_SEQUENCE",
+            "E_REQUEST_ID",
+            "E_CREDENTIAL_NOT_FOUND",
+            "E_VERSION_CONFLICT",
+            "E_OPERATION_CONFLICT",
+            "E_PROFILE_DENIED",
+            "E_STORAGE",
+            "E_CREDENTIAL_REVOKED",
+            "E_STORAGE_NOT_COMMITTED",
+            "E_BUSY",
+            "E_LIMIT",
+            "E_BODY_LENGTH",
+            "E_BODY_OFFSET",
+            "E_BODY_DIGEST",
+            "E_TLS",
+            "E_HTTP_PARSE",
+            "E_NETWORK",
+            "E_DEADLINE",
+            "E_HTTP_LIMIT",
+            "E_INTERNAL"
+          ]
+        },
+        "stage": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "wire",
+                "hello",
+                "credential",
+                "open",
+                "upload",
+                "tls_handshake",
+                "tls_io",
+                "http",
+                "network",
+                "finish",
+                "cancel",
+                "deadline",
+                "cleanup",
+                "internal",
+                "content_encoding"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "NEW",
+            "HELLO_READY",
+            "UPLOADING",
+            "HANDSHAKING",
+            "EXCHANGING",
+            "HTTP_COMPLETE",
+            "ENDED",
+            "CANCELLED",
+            "EXPIRED",
+            "FAILED"
+          ]
+        },
+        "retry": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "none",
+                "resize_only",
+                "new_request_only",
+                "reconcile_management"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "name",
+        "stage",
+        "state",
+        "retry"
+      ],
+      "additionalProperties": false
+    },
+    "taTerminal": {
+      "type": "object",
+      "properties": {
+        "end_reason": {
+          "type": "string",
+          "enum": [
+            "consumer_complete",
+            "response_consumed",
+            "cancelled",
+            "deadline",
+            "revoked",
+            "transport_error",
+            "internal_error"
+          ]
+        },
+        "http_framing": {
+          "type": "string",
+          "enum": [
+            "not_started",
+            "in_progress",
+            "complete",
+            "invalid"
+          ]
+        },
+        "tls_phase": {
+          "type": "string",
+          "enum": [
+            "not_started",
+            "handshake",
+            "application",
+            "closed",
+            "failed"
+          ]
+        },
+        "close_notify_received": {
+          "type": "boolean"
+        },
+        "request_application_bytes_generated": {
+          "$ref": "#/$defs/u64"
+        },
+        "emitted_http_body": {
+          "$ref": "#/$defs/u64"
+        },
+        "app_resources": {
+          "const": "released"
+        },
+        "manager_cleanup": {
+          "const": "not_asserted"
+        }
+      },
+      "required": [
+        "end_reason",
+        "http_framing",
+        "tls_phase",
+        "close_notify_received",
+        "request_application_bytes_generated",
+        "emitted_http_body",
+        "app_resources",
+        "manager_cleanup"
+      ],
+      "additionalProperties": false
+    },
+    "localError": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "integer",
+          "minimum": -12,
+          "maximum": -1
+        },
+        "stage": {
+          "type": "string",
+          "enum": [
+            "admission",
+            "allocation",
+            "codec",
+            "delivery",
+            "shutdown",
+            "internal"
+          ]
+        }
+      },
+      "required": [
+        "status",
+        "stage"
+      ],
+      "additionalProperties": false
+    },
+    "reconciliation": {
+      "type": "object",
+      "properties": {
+        "operation_id": {
+          "$ref": "#/$defs/hex128"
+        },
+        "credential_ref": {
+          "$ref": "#/$defs/hex128"
+        },
+        "expected_version": {
+          "$ref": "#/$defs/u64"
+        },
+        "receipt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/receipt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "operation_id",
+        "credential_ref",
+        "expected_version",
+        "receipt"
+      ],
+      "additionalProperties": false
+    },
+    "terminal": {
+      "type": "object",
+      "properties": {
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "completed",
+            "incomplete",
+            "provider_error",
+            "transport_error",
+            "cancelled",
+            "timeout",
+            "protocol_error"
+          ]
+        },
+        "local_error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/localError"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sdk_transport": {
+          "$ref": "#/$defs/sdkTransport"
+        },
+        "lsp": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/lspSnapshot"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "http_status": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 200,
+              "maximum": 599
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "network_error_code": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "dns_failed",
+                "connect_failed",
+                "connect_timeout",
+                "read_failed",
+                "write_failed",
+                "reset",
+                "idle_timeout"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "model_outcome": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "completed",
+                "incomplete",
+                "provider_error",
+                "protocol_error"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "model_stop_reason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128,
+              "pattern": "^[\\x20-\\x7e]+$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "transport_snapshot": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/taTerminal"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "delivery": {
+          "type": "object",
+          "properties": {
+            "body_bytes_emitted": {
+              "$ref": "#/$defs/u64"
+            },
+            "body_bytes_confirmed": {
+              "$ref": "#/$defs/u64"
+            },
+            "body_bytes_dropped": {
+              "$ref": "#/$defs/u64"
+            },
+            "evidence": {
+              "type": "string",
+              "enum": [
+                "confirmed",
+                "unknown_after_lease_expiry",
+                "detached"
+              ]
+            }
+          },
+          "required": [
+            "body_bytes_emitted",
+            "body_bytes_confirmed",
+            "body_bytes_dropped",
+            "evidence"
+          ],
+          "additionalProperties": false
+        },
+        "cleanup": {
+          "type": "object",
+          "properties": {
+            "local": {
+              "type": "string",
+              "enum": [
+                "live",
+                "requested",
+                "sdk_closing",
+                "local_released",
+                "stalled"
+              ]
+            },
+            "remote": {
+              "type": "string",
+              "enum": [
+                "not_asserted",
+                "pending",
+                "confirmed",
+                "unknown"
+              ]
+            }
+          },
+          "required": [
+            "local",
+            "remote"
+          ],
+          "additionalProperties": false
+        },
+        "management_commit_state": {
+          "type": "string",
+          "enum": [
+            "not_applicable",
+            "not_sent",
+            "unknown",
+            "committed",
+            "not_committed_confirmed"
+          ]
+        },
+        "reconciliation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/reconciliation"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "side_effect_state": {
+          "type": "string",
+          "enum": [
+            "not_sent",
+            "possibly_sent",
+            "response_observed"
+          ]
+        },
+        "management_remote_commit": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "committed",
+                "not_committed",
+                "unknown"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "outcome",
+        "local_error",
+        "sdk_transport",
+        "lsp",
+        "http_status",
+        "network_error_code",
+        "model_outcome",
+        "model_stop_reason",
+        "transport_snapshot",
+        "delivery",
+        "cleanup",
+        "management_commit_state",
+        "reconciliation",
+        "side_effect_state",
+        "management_remote_commit"
+      ],
+      "additionalProperties": false
+    },
+    "responseHeadEvent": {
+      "type": "object",
+      "properties": {
+        "document_type": {
+          "const": "event"
+        },
+        "contract_version": {
+          "const": 1
+        },
+        "event_type": {
+          "const": "response_head"
+        },
+        "operation_kind": {
+          "type": "string",
+          "enum": [
+            "request",
+            "put",
+            "query",
+            "delete",
+            "probe"
+          ]
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/correlationId"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/hex128"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "event_sequence": {
+          "$ref": "#/$defs/u64Positive"
+        },
+        "ticket": {
+          "$ref": "#/$defs/u64Positive"
+        },
+        "http": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "integer",
+              "minimum": 200,
+              "maximum": 599
+            },
+            "headers": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/responseHeader"
+              },
+              "maxItems": 128
+            }
+          },
+          "required": [
+            "status",
+            "headers"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "document_type",
+        "contract_version",
+        "event_type",
+        "operation_kind",
+        "correlation_id",
+        "request_id",
+        "event_sequence",
+        "ticket",
+        "http"
+      ],
+      "additionalProperties": false
+    },
+    "bodyEvent": {
+      "type": "object",
+      "properties": {
+        "document_type": {
+          "const": "event"
+        },
+        "contract_version": {
+          "const": 1
+        },
+        "event_type": {
+          "const": "body"
+        },
+        "operation_kind": {
+          "type": "string",
+          "enum": [
+            "request",
+            "put",
+            "query",
+            "delete",
+            "probe"
+          ]
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/correlationId"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/hex128"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "event_sequence": {
+          "$ref": "#/$defs/u64Positive"
+        },
+        "ticket": {
+          "$ref": "#/$defs/u64Positive"
+        },
+        "stream_offset": {
+          "$ref": "#/$defs/u64"
+        },
+        "byte_length": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65536
+        }
+      },
+      "required": [
+        "document_type",
+        "contract_version",
+        "event_type",
+        "operation_kind",
+        "correlation_id",
+        "request_id",
+        "event_sequence",
+        "ticket",
+        "stream_offset",
+        "byte_length"
+      ],
+      "additionalProperties": false
+    },
+    "credentialResultEvent": {
+      "type": "object",
+      "properties": {
+        "document_type": {
+          "const": "event"
+        },
+        "contract_version": {
+          "const": 1
+        },
+        "event_type": {
+          "const": "management_result"
+        },
+        "operation_kind": {
+          "type": "string",
+          "enum": [
+            "request",
+            "put",
+            "query",
+            "delete",
+            "probe"
+          ]
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/correlationId"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/hex128"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "event_sequence": {
+          "$ref": "#/$defs/u64Positive"
+        },
+        "ticket": {
+          "$ref": "#/$defs/u64Positive"
+        },
+        "result_type": {
+          "const": "credential"
+        },
+        "result": {
+          "$ref": "#/$defs/credentialResult"
+        }
+      },
+      "required": [
+        "document_type",
+        "contract_version",
+        "event_type",
+        "operation_kind",
+        "correlation_id",
+        "request_id",
+        "event_sequence",
+        "ticket",
+        "result_type",
+        "result"
+      ],
+      "additionalProperties": false
+    },
+    "probeResultEvent": {
+      "type": "object",
+      "properties": {
+        "document_type": {
+          "const": "event"
+        },
+        "contract_version": {
+          "const": 1
+        },
+        "event_type": {
+          "const": "management_result"
+        },
+        "operation_kind": {
+          "type": "string",
+          "enum": [
+            "request",
+            "put",
+            "query",
+            "delete",
+            "probe"
+          ]
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/correlationId"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/hex128"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "event_sequence": {
+          "$ref": "#/$defs/u64Positive"
+        },
+        "ticket": {
+          "$ref": "#/$defs/u64Positive"
+        },
+        "result_type": {
+          "const": "capabilities"
+        },
+        "result": {
+          "$ref": "#/$defs/backendHelloResult"
+        },
+        "effective_resources": {
+          "$ref": "#/$defs/resources"
+        },
+        "effective_timeouts": {
+          "$ref": "#/$defs/timeouts"
+        }
+      },
+      "required": [
+        "document_type",
+        "contract_version",
+        "event_type",
+        "operation_kind",
+        "correlation_id",
+        "request_id",
+        "event_sequence",
+        "ticket",
+        "result_type",
+        "result",
+        "effective_resources",
+        "effective_timeouts"
+      ],
+      "additionalProperties": false
+    },
+    "terminalEvent": {
+      "type": "object",
+      "properties": {
+        "document_type": {
+          "const": "event"
+        },
+        "contract_version": {
+          "const": 1
+        },
+        "event_type": {
+          "const": "terminal"
+        },
+        "operation_kind": {
+          "type": "string",
+          "enum": [
+            "request",
+            "put",
+            "query",
+            "delete",
+            "probe"
+          ]
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/correlationId"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/hex128"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "event_sequence": {
+          "$ref": "#/$defs/u64Positive"
+        },
+        "ticket": {
+          "$ref": "#/$defs/u64Positive"
+        },
+        "terminal": {
+          "$ref": "#/$defs/terminal"
+        }
+      },
+      "required": [
+        "document_type",
+        "contract_version",
+        "event_type",
+        "operation_kind",
+        "correlation_id",
+        "request_id",
+        "event_sequence",
+        "ticket",
+        "terminal"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "operation_kind": {
+                "enum": [
+                  "put",
+                  "delete"
+                ]
+              },
+              "terminal": {
+                "properties": {
+                  "sdk_transport": {
+                    "properties": {
+                      "state": {
+                        "const": "ok"
+                      },
+                      "phase": {
+                        "const": "invoke"
+                      },
+                      "result": {
+                        "const": 0
+                      }
+                    }
+                  },
+                  "lsp": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "enum": [
+                          "E_WIRE_FORMAT"
+                        ]
+                      },
+                      "stage": {
+                        "const": "wire"
+                      },
+                      "state": {
+                        "const": "HELLO_READY"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "terminal": {
+                "properties": {
+                  "management_commit_state": {
+                    "const": "not_committed_confirmed"
+                  },
+                  "management_remote_commit": {
+                    "const": "not_committed"
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation_kind": {
+                "enum": [
+                  "put",
+                  "delete"
+                ]
+              },
+              "terminal": {
+                "properties": {
+                  "sdk_transport": {
+                    "properties": {
+                      "state": {
+                        "const": "ok"
+                      },
+                      "phase": {
+                        "const": "invoke"
+                      },
+                      "result": {
+                        "const": 0
+                      }
+                    }
+                  },
+                  "lsp": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "enum": [
+                          "E_ROLE",
+                          "E_STATE",
+                          "E_CREDENTIAL_NOT_FOUND",
+                          "E_VERSION_CONFLICT",
+                          "E_OPERATION_CONFLICT",
+                          "E_PROFILE_DENIED",
+                          "E_CREDENTIAL_REVOKED",
+                          "E_BUSY",
+                          "E_LIMIT"
+                        ]
+                      },
+                      "stage": {
+                        "const": "credential"
+                      },
+                      "state": {
+                        "const": "HELLO_READY"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "terminal": {
+                "properties": {
+                  "management_commit_state": {
+                    "const": "not_committed_confirmed"
+                  },
+                  "management_remote_commit": {
+                    "const": "not_committed"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "outputCapacityEvidence": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "output_capacity_rejected"
+        },
+        "teec_result": {
+          "const": 0
+        },
+        "p1_size": {
+          "const": 0
+        },
+        "p2_a": {
+          "const": 4097
+        },
+        "p2_b": {
+          "const": 32768
+        },
+        "provided_output_capacity": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 32767
+        }
+      },
+      "required": [
+        "kind",
+        "teec_result",
+        "p1_size",
+        "p2_a",
+        "p2_b",
+        "provided_output_capacity"
+      ],
+      "additionalProperties": false
+    },
+    "providerConfig": {
+      "type": "object",
+      "properties": {
+        "provider_type": {
+          "$ref": "#/$defs/providerType"
+        },
+        "base_url": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "pattern": "^https://",
+          "description": "HTTPS API prefix, normalized and bound to the credential. UTF-8 byte length at most 1024."
+        }
+      },
+      "required": [
+        "provider_type",
+        "base_url"
+      ],
+      "additionalProperties": false
+    },
+    "providerType": {
+      "type": "string",
+      "enum": [
+        "openai_compatible",
+        "openai_responses",
+        "anthropic_messages",
+        "google_gemini",
+        "ollama_native"
+      ]
+    }
+  },
+  "x-initial-engineering-config": {
+    "document_type": "runtime_config",
+    "contract_version": 1,
+    "sdk_profile": "functional-library-v1",
+    "required_backend_contract_id": "lsp-provider-dev-v2",
+    "endpoint": {
+      "cid": 201,
+      "port": 10099
+    },
+    "resources": {
+      "max_request_workers": 4,
+      "max_queued_requests": 4,
+      "max_queued_management": 8,
+      "max_operation_records": 32,
+      "max_request_body_bytes": 33554432,
+      "max_native_retained_bytes": 134217728,
+      "net_rx_bytes_per_request": 65536,
+      "net_tx_bytes_per_request": 65536,
+      "app_rx_bytes_per_request": 65536,
+      "max_event_metadata_bytes": 8192,
+      "max_event_body_bytes": 16384,
+      "max_credential_bytes": 4096,
+      "max_pending_java_events_per_operation": 1,
+      "max_request_body_reservation_bytes": 67108864
+    },
+    "timeouts": {
+      "default_overall_ms": 120000,
+      "max_overall_ms": 600000,
+      "sdk_connect_ms": 5000,
+      "sdk_handshake_ms": 10000,
+      "sdk_call_budget_ms": 5000,
+      "sdk_connect_open_ms": 15000,
+      "sdk_graceful_close_ms": 15000,
+      "worker_reap_grace_ms": 3000,
+      "network_connect_ms": 15000,
+      "network_idle_ms": 30000,
+      "upload_idle_ms": 10000,
+      "heartbeat_ms": 1000,
+      "consumer_idle_ms": 30000,
+      "event_ack_ms": 30000,
+      "max_read_wait_ms": 1000,
+      "cleanup_observe_ms": 2000,
+      "default_temporary_ttl_ms": 60000,
+      "max_temporary_ttl_ms": 300000
+    },
+    "profiles": [
+      "deepseek-prod-v1",
+      "custom-provider-v1"
+    ]
+  },
+  "x-not-performance-or-device-validation": true,
+  "x-derived-lsp-registry-sha256": "c61dae7fcdc960dd91084cc13c5f3523d2e6f0b40b9c293e9cef883ebd00c0cd",
+  "x-observer-build-limits": {
+    "json_response_bytes": 4194304,
+    "sse_event_bytes": 1048576,
+    "sse_line_bytes": 1048576,
+    "json_depth": 64,
+    "content_blocks": 128,
+    "chat_choices": 1
+  },
+  "x-precommit-rejection-rules": [
+    {
+      "stage": "wire",
+      "state": "HELLO_READY",
+      "statuses": [
+        "E_WIRE_FORMAT"
+      ]
+    },
+    {
+      "stage": "credential",
+      "state": "HELLO_READY",
+      "statuses": [
+        "E_ROLE",
+        "E_STATE",
+        "E_CREDENTIAL_NOT_FOUND",
+        "E_VERSION_CONFLICT",
+        "E_OPERATION_CONFLICT",
+        "E_PROFILE_DENIED",
+        "E_CREDENTIAL_REVOKED",
+        "E_BUSY",
+        "E_LIMIT"
+      ]
+    }
+  ],
+  "x-precommit-result-scope": "This invocation did not add a commit; no statement about all historical attempts sharing operation_id."
+}

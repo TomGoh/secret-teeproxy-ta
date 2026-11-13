@@ -1,0 +1,1166 @@
+{
+  "scope": "DESIGN_EDGE_FIXTURES_NOT_STATE_MACHINE_OR_TLS_EXECUTION",
+  "schema": "lsp-v1-metadata.schema.json",
+  "cases": [
+    {
+      "name": "fatal_network",
+      "op": "STEP",
+      "context": {
+        "request_bound": true,
+        "prior_emitted_http_body": 128,
+        "newly_terminal": true,
+        "note": "Standalone frame with prior HTTP_HEAD/session state established; synthetic bytes, not actual TLS execution."
+      },
+      "request": {
+        "header": {
+          "magic": "LSP1",
+          "major": 1,
+          "minor": 0,
+          "opcode": 259,
+          "flags": 0,
+          "header_len": 64,
+          "reserved0": 0,
+          "frame_len": 285,
+          "meta_len": 221,
+          "request_id": "03030303030303030303030303030303",
+          "call_seq": "17",
+          "status": 0,
+          "payload_len": 0,
+          "reserved1": "0"
+        },
+        "metadata": {
+          "ta_epoch": "01010101010101010101010101010101",
+          "session_nonce": "02020202020202020202020202020202",
+          "input_kind": "network_error",
+          "tls_rx_offset": "77",
+          "net_tx_credit": 65536,
+          "app_rx_credit": 65536,
+          "network_error_code": "reset"
+        },
+        "payload_hex": ""
+      },
+      "reply": {
+        "header": {
+          "magic": "LSP1",
+          "major": 1,
+          "minor": 0,
+          "opcode": 259,
+          "flags": 1,
+          "header_len": 64,
+          "reserved0": 0,
+          "frame_len": 1105,
+          "meta_len": 1041,
+          "request_id": "03030303030303030303030303030303",
+          "call_seq": "17",
+          "status": 5123,
+          "payload_len": 0,
+          "reserved1": "0"
+        },
+        "metadata": {
+          "ta_epoch": "01010101010101010101010101010101",
+          "session_nonce": "02020202020202020202020202020202",
+          "next_call_seq": "18",
+          "state": "FAILED",
+          "error": {
+            "code": "E_NETWORK",
+            "stage": "network",
+            "retry": "none"
+          },
+          "result": null,
+          "progress": {
+            "accepted_input_bytes": 0,
+            "uploaded_body": "64",
+            "accepted_tls_rx": "77",
+            "emitted_tls_tx": "100",
+            "emitted_http_body": "128",
+            "rx_credit": 0,
+            "net_tx_pending": false,
+            "http_body_pending": false,
+            "need_step": false,
+            "poll_after_ms": 0,
+            "events": [
+              {
+                "event_seq": "9",
+                "kind": "REQUEST_END",
+                "offset": 0,
+                "length": 0,
+                "details": {
+                  "end_reason": "transport_error",
+                  "http_framing": "in_progress",
+                  "tls_phase": "failed",
+                  "close_notify_received": false,
+                  "request_application_bytes_generated": "64",
+                  "emitted_http_body": "128",
+                  "app_resources": "released",
+                  "manager_cleanup": "not_asserted"
+                }
+              }
+            ],
+            "terminal": {
+              "end_reason": "transport_error",
+              "http_framing": "in_progress",
+              "tls_phase": "failed",
+              "close_notify_received": false,
+              "request_application_bytes_generated": "64",
+              "emitted_http_body": "128",
+              "app_resources": "released",
+              "manager_cleanup": "not_asserted"
+            },
+            "connect_target": null
+          }
+        },
+        "payload_hex": ""
+      }
+    },
+    {
+      "name": "fatal_tls",
+      "op": "STEP",
+      "context": {
+        "request_bound": true,
+        "prior_emitted_http_body": 128,
+        "newly_terminal": true,
+        "note": "Standalone frame with prior HTTP_HEAD/session state established; synthetic bytes, not actual TLS execution."
+      },
+      "request": {
+        "header": {
+          "magic": "LSP1",
+          "major": 1,
+          "minor": 0,
+          "opcode": 259,
+          "flags": 0,
+          "header_len": 64,
+          "reserved0": 0,
+          "frame_len": 247,
+          "meta_len": 183,
+          "request_id": "03030303030303030303030303030303",
+          "call_seq": "17",
+          "status": 0,
+          "payload_len": 0,
+          "reserved1": "0"
+        },
+        "metadata": {
+          "ta_epoch": "01010101010101010101010101010101",
+          "session_nonce": "02020202020202020202020202020202",
+          "input_kind": "none",
+          "tls_rx_offset": "77",
+          "net_tx_credit": 65536,
+          "app_rx_credit": 65536
+        },
+        "payload_hex": ""
+      },
+      "reply": {
+        "header": {
+          "magic": "LSP1",
+          "major": 1,
+          "minor": 0,
+          "opcode": 259,
+          "flags": 1,
+          "header_len": 64,
+          "reserved0": 0,
+          "frame_len": 1100,
+          "meta_len": 1036,
+          "request_id": "03030303030303030303030303030303",
+          "call_seq": "17",
+          "status": 5121,
+          "payload_len": 0,
+          "reserved1": "0"
+        },
+        "metadata": {
+          "ta_epoch": "01010101010101010101010101010101",
+          "session_nonce": "02020202020202020202020202020202",
+          "next_call_seq": "18",
+          "state": "FAILED",
+          "error": {
+            "code": "E_TLS",
+            "stage": "tls_io",
+            "retry": "none"
+          },
+          "result": null,
+          "progress": {
+            "accepted_input_bytes": 0,
+            "uploaded_body": "64",
+            "accepted_tls_rx": "77",
+            "emitted_tls_tx": "100",
+            "emitted_http_body": "128",
+            "rx_credit": 0,
+            "net_tx_pending": false,
+            "http_body_pending": false,
+            "need_step": false,
+            "poll_after_ms": 0,
+            "events": [
+              {
+                "event_seq": "9",
+                "kind": "REQUEST_END",
+                "offset": 0,
+                "length": 0,
+                "details": {
+                  "end_reason": "transport_error",
+                  "http_framing": "in_progress",
+                  "tls_phase": "failed",
+                  "close_notify_received": false,
+                  "request_application_bytes_generated": "64",
+                  "emitted_http_body": "128",
+                  "app_resources": "released",
+                  "manager_cleanup": "not_asserted"
+                }
+              }
+            ],
+            "terminal": {
+              "end_reason": "transport_error",
+              "http_framing": "in_progress",
+              "tls_phase": "failed",
+              "close_notify_received": false,
+              "request_application_bytes_generated": "64",
+              "emitted_http_body": "128",
+              "app_resources": "released",
+              "manager_cleanup": "not_asserted"
+            },
+            "connect_target": null
+          }
+        },
+        "payload_hex": ""
+      }
+    },
+    {
+      "name": "fatal_revoked",
+      "op": "STEP",
+      "context": {
+        "request_bound": true,
+        "prior_emitted_http_body": 128,
+        "newly_terminal": true,
+        "note": "Standalone frame with prior HTTP_HEAD/session state established; synthetic bytes, not actual TLS execution."
+      },
+      "request": {
+        "header": {
+          "magic": "LSP1",
+          "major": 1,
+          "minor": 0,
+          "opcode": 259,
+          "flags": 0,
+          "header_len": 64,
+          "reserved0": 0,
+          "frame_len": 247,
+          "meta_len": 183,
+          "request_id": "03030303030303030303030303030303",
+          "call_seq": "17",
+          "status": 0,
+          "payload_len": 0,
+          "reserved1": "0"
+        },
+        "metadata": {
+          "ta_epoch": "01010101010101010101010101010101",
+          "session_nonce": "02020202020202020202020202020202",
+          "input_kind": "none",
+          "tls_rx_offset": "77",
+          "net_tx_credit": 65536,
+          "app_rx_credit": 65536
+        },
+        "payload_hex": ""
+      },
+      "reply": {
+        "header": {
+          "magic": "LSP1",
+          "major": 1,
+          "minor": 0,
+          "opcode": 259,
+          "flags": 1,
+          "header_len": 64,
+          "reserved0": 0,
+          "frame_len": 1103,
+          "meta_len": 1039,
+          "request_id": "03030303030303030303030303030303",
+          "call_seq": "17",
+          "status": 4614,
+          "payload_len": 0,
+          "reserved1": "0"
+        },
+        "metadata": {
+          "ta_epoch": "01010101010101010101010101010101",
+          "session_nonce": "02020202020202020202020202020202",
+          "next_call_seq": "18",
+          "state": "FAILED",
+          "error": {
+            "code": "E_CREDENTIAL_REVOKED",
+            "stage": "credential",
+            "retry": "none"
+          },
+          "result": null,
+          "progress": {
+            "accepted_input_bytes": 0,
+            "uploaded_body": "64",
+            "accepted_tls_rx": "77",
+            "emitted_tls_tx": "100",
+            "emitted_http_body": "128",
+            "rx_credit": 0,
+            "net_tx_pending": false,
+            "http_body_pending": false,
+            "need_step": false,
+            "poll_after_ms": 0,
+            "events": [
+              {
+                "event_seq": "9",
+                "kind": "REQUEST_END",
+                "offset": 0,
+                "length": 0,
+                "details": {
+                  "end_reason": "revoked",
+                  "http_framing": "in_progress",
+                  "tls_phase": "failed",
+                  "close_notify_received": false,
+                  "request_application_bytes_generated": "64",
+                  "emitted_http_body": "128",
+                  "app_resources": "released",
+                  "manager_cleanup": "not_asserted"
+                }
+              }
+            ],
+            "terminal": {
+              "end_reason": "revoked",
+              "http_framing": "in_progress",
+              "tls_phase": "failed",
+              "close_notify_received": false,
+              "request_application_bytes_generated": "64",
+              "emitted_http_body": "128",
+              "app_resources": "released",
+              "manager_cleanup": "not_asserted"
+            },
+            "connect_target": null
+          }
+        },
+        "payload_hex": ""
+      }
+    },
+    {
+      "name": "fatal_deadline",
+      "op": "STEP",
+      "context": {
+        "request_bound": true,
+        "prior_emitted_http_body": 128,
+        "newly_terminal": true,
+        "note": "Standalone frame with prior HTTP_HEAD/session state established; synthetic bytes, not actual TLS execution."
+      },
+      "request": {
+        "header": {
+          "magic": "LSP1",
+          "major": 1,
+          "minor": 0,
+          "opcode": 259,
+          "flags": 0,
+          "header_len": 64,
+          "reserved0": 0,
+          "frame_len": 247,
+          "meta_len": 183,
+          "request_id": "03030303030303030303030303030303",
+          "call_seq": "17",
+          "status": 0,
+          "payload_len": 0,
+          "reserved1": "0"
+        },
+        "metadata": {
+          "ta_epoch": "01010101010101010101010101010101",
+          "session_nonce": "02020202020202020202020202020202",
+          "input_kind": "none",
+          "tls_rx_offset": "77",
+          "net_tx_credit": 65536,
+          "app_rx_credit": 65536
+        },
+        "payload_hex": ""
+      },
+      "reply": {
+        "header": {
+          "magic": "LSP1",
+          "major": 1,
+          "minor": 0,
+          "opcode": 259,
+          "flags": 1,
+          "header_len": 64,
+          "reserved0": 0,
+          "frame_len": 1094,
+          "meta_len": 1030,
+          "request_id": "03030303030303030303030303030303",
+          "call_seq": "17",
+          "status": 5124,
+          "payload_len": 0,
+          "reserved1": "0"
+        },
+        "metadata": {
+          "ta_epoch": "01010101010101010101010101010101",
+          "session_nonce": "02020202020202020202020202020202",
+          "next_call_seq": "18",
+          "state": "EXPIRED",
+          "error": {
+            "code": "E_DEADLINE",
+            "stage": "deadline",
+            "retry": "none"
+          },
+          "result": null,
+          "progress": {
+            "accepted_input_bytes": 0,
+            "uploaded_body": "64",
+            "accepted_tls_rx": "77",
+            "emitted_tls_tx": "100",
+            "emitted_http_body": "128",
+            "rx_credit": 0,
+            "net_tx_pending": false,
+            "http_body_pending": false,
+            "need_step": false,
+            "poll_after_ms": 0,
+            "events": [
+              {
+                "event_seq": "9",
+                "kind": "REQUEST_END",
+                "offset": 0,
+                "length": 0,
+                "details": {
+                  "end_reason": "deadline",
+                  "http_framing": "in_progress",
+                  "tls_phase": "failed",
+                  "close_notify_received": false,
+                  "request_application_bytes_generated": "64",
+                  "emitted_http_body": "128",
+                  "app_resources": "released",
+                  "manager_cleanup": "not_asserted"
+                }
+              }
+            ],
+            "terminal": {
+              "end_reason": "deadline",
+              "http_framing": "in_progress",
+              "tls_phase": "failed",
+              "close_notify_received": false,
+              "request_application_bytes_generated": "64",
+              "emitted_http_body": "128",
+              "app_resources": "released",
+              "manager_cleanup": "not_asserted"
+            },
+            "connect_target": null
+          }
+        },
+        "payload_hex": ""
+      }
+    },
+    {
+      "name": "fatal_after_whole_tls_input_accepted",
+      "op": "STEP",
+      "context": {
+        "request_bound": true,
+        "prior_emitted_http_body": 128,
+        "newly_terminal": true,
+        "note": "Standalone frame with prior HTTP_HEAD/session state established; synthetic bytes, not actual TLS execution."
+      },
+      "request": {
+        "header": {
+          "magic": "LSP1",
+          "major": 1,
+          "minor": 0,
+          "opcode": 259,
+          "flags": 0,
+          "header_len": 64,
+          "reserved0": 0,
+          "frame_len": 505,
+          "meta_len": 185,
+          "request_id": "03030303030303030303030303030303",
+          "call_seq": "17",
+          "status": 0,
+          "payload_len": 256,
+          "reserved1": "0"
+        },
+        "metadata": {
+          "ta_epoch": "01010101010101010101010101010101",
+          "session_nonce": "02020202020202020202020202020202",
+          "input_kind": "tls_rx",
+          "tls_rx_offset": "77",
+          "net_tx_credit": 65536,
+          "app_rx_credit": 65536
+        },
+        "payload_hex": "78787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878787878"
+      },
+      "reply": {
+        "header": {
+          "magic": "LSP1",
+          "major": 1,
+          "minor": 0,
+          "opcode": 259,
+          "flags": 1,
+          "header_len": 64,
+          "reserved0": 0,
+          "frame_len": 1103,
+          "meta_len": 1039,
+          "request_id": "03030303030303030303030303030303",
+          "call_seq": "17",
+          "status": 5121,
+          "payload_len": 0,
+          "reserved1": "0"
+        },
+        "metadata": {
+          "ta_epoch": "01010101010101010101010101010101",
+          "session_nonce": "02020202020202020202020202020202",
+          "next_call_seq": "18",
+          "state": "FAILED",
+          "error": {
+            "code": "E_TLS",
+            "stage": "tls_io",
+            "retry": "none"
+          },
+          "result": null,
+          "progress": {
+            "accepted_input_bytes": 256,
+            "uploaded_body": "64",
+            "accepted_tls_rx": "333",
+            "emitted_tls_tx": "100",
+            "emitted_http_body": "128",
+            "rx_credit": 0,
+            "net_tx_pending": false,
+            "http_body_pending": false,
+            "need_step": false,
+            "poll_after_ms": 0,
+            "events": [
+              {
+                "event_seq": "9",
+                "kind": "REQUEST_END",
+                "offset": 0,
+                "length": 0,
+                "details": {
+                  "end_reason": "transport_error",
+                  "http_framing": "in_progress",
+                  "tls_phase": "failed",
+                  "close_notify_received": false,
+                  "request_application_bytes_generated": "64",
+                  "emitted_http_body": "128",
+                  "app_resources": "released",
+                  "manager_cleanup": "not_asserted"
+                }
+              }
+            ],
+            "terminal": {
+              "end_reason": "transport_error",
+              "http_framing": "in_progress",
+              "tls_phase": "failed",
+              "close_notify_received": false,
+              "request_application_bytes_generated": "64",
+              "emitted_http_body": "128",
+              "app_resources": "released",
+              "manager_cleanup": "not_asserted"
+            },
+            "connect_target": null
+          }
+        },
+        "payload_hex": ""
+      }
+    },
+    {
+      "name": "accepted_zero_drains_previous_body",
+      "op": "STEP",
+      "context": {
+        "request_bound": true,
+        "prior_emitted_http_body": 128,
+        "newly_terminal": false,
+        "note": "Standalone frame with prior HTTP_HEAD/session state established; synthetic bytes, not actual TLS execution."
+      },
+      "request": {
+        "header": {
+          "magic": "LSP1",
+          "major": 1,
+          "minor": 0,
+          "opcode": 259,
+          "flags": 0,
+          "header_len": 64,
+          "reserved0": 0,
+          "frame_len": 313,
+          "meta_len": 185,
+          "request_id": "03030303030303030303030303030303",
+          "call_seq": "17",
+          "status": 0,
+          "payload_len": 64,
+          "reserved1": "0"
+        },
+        "metadata": {
+          "ta_epoch": "01010101010101010101010101010101",
+          "session_nonce": "02020202020202020202020202020202",
+          "input_kind": "tls_rx",
+          "tls_rx_offset": "77",
+          "net_tx_credit": 65536,
+          "app_rx_credit": 65536
+        },
+        "payload_hex": "7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a"
+      },
+      "reply": {
+        "header": {
+          "magic": "LSP1",
+          "major": 1,
+          "minor": 0,
+          "opcode": 259,
+          "flags": 1,
+          "header_len": 64,
+          "reserved0": 0,
+          "frame_len": 596,
+          "meta_len": 528,
+          "request_id": "03030303030303030303030303030303",
+          "call_seq": "17",
+          "status": 0,
+          "payload_len": 4,
+          "reserved1": "0"
+        },
+        "metadata": {
+          "ta_epoch": "01010101010101010101010101010101",
+          "session_nonce": "02020202020202020202020202020202",
+          "next_call_seq": "18",
+          "state": "EXCHANGING",
+          "error": null,
+          "result": null,
+          "progress": {
+            "accepted_input_bytes": 0,
+            "uploaded_body": "64",
+            "accepted_tls_rx": "77",
+            "emitted_tls_tx": "100",
+            "emitted_http_body": "132",
+            "rx_credit": 64,
+            "net_tx_pending": false,
+            "http_body_pending": false,
+            "need_step": false,
+            "poll_after_ms": 0,
+            "events": [
+              {
+                "event_seq": "9",
+                "kind": "HTTP_BODY",
+                "offset": 0,
+                "length": 4,
+                "stream_offset": "128"
+              }
+            ],
+            "terminal": null,
+            "connect_target": null
+          }
+        },
+        "payload_hex": "70617274"
+      }
+    },
+    {
+      "name": "typed_mixed_payload",
+      "op": "STEP",
+      "context": {
+        "request_bound": true,
+        "prior_emitted_http_body": 128,
+        "newly_terminal": false,
+        "note": "Standalone frame with prior HTTP_HEAD/session state established; synthetic bytes, not actual TLS execution."
+      },
+      "request": {
+        "header": {
+          "magic": "LSP1",
+          "major": 1,
+          "minor": 0,
+          "opcode": 259,
+          "flags": 0,
+          "header_len": 64,
+          "reserved0": 0,
+          "frame_len": 247,
+          "meta_len": 183,
+          "request_id": "03030303030303030303030303030303",
+          "call_seq": "17",
+          "status": 0,
+          "payload_len": 0,
+          "reserved1": "0"
+        },
+        "metadata": {
+          "ta_epoch": "01010101010101010101010101010101",
+          "session_nonce": "02020202020202020202020202020202",
+          "input_kind": "none",
+          "tls_rx_offset": "77",
+          "net_tx_credit": 65536,
+          "app_rx_credit": 65536
+        },
+        "payload_hex": ""
+      },
+      "reply": {
+        "header": {
+          "magic": "LSP1",
+          "major": 1,
+          "minor": 0,
+          "opcode": 259,
+          "flags": 1,
+          "header_len": 64,
+          "reserved0": 0,
+          "frame_len": 707,
+          "meta_len": 634,
+          "request_id": "03030303030303030303030303030303",
+          "call_seq": "17",
+          "status": 0,
+          "payload_len": 9,
+          "reserved1": "0"
+        },
+        "metadata": {
+          "ta_epoch": "01010101010101010101010101010101",
+          "session_nonce": "02020202020202020202020202020202",
+          "next_call_seq": "18",
+          "state": "EXCHANGING",
+          "error": null,
+          "result": null,
+          "progress": {
+            "accepted_input_bytes": 0,
+            "uploaded_body": "64",
+            "accepted_tls_rx": "77",
+            "emitted_tls_tx": "105",
+            "emitted_http_body": "132",
+            "rx_credit": 0,
+            "net_tx_pending": false,
+            "http_body_pending": false,
+            "need_step": false,
+            "poll_after_ms": 0,
+            "events": [
+              {
+                "event_seq": "9",
+                "kind": "NET_TX",
+                "offset": 0,
+                "length": 5,
+                "stream_offset": "100",
+                "may_contain_request": false
+              },
+              {
+                "event_seq": "10",
+                "kind": "HTTP_BODY",
+                "offset": 5,
+                "length": 4,
+                "stream_offset": "128"
+              }
+            ],
+            "terminal": null,
+            "connect_target": null
+          }
+        },
+        "payload_hex": "746c732121626f6479"
+      }
+    },
+    {
+      "name": "maximum_reply_eight_body_events",
+      "op": "STEP",
+      "context": {
+        "request_bound": true,
+        "prior_emitted_http_body": 128,
+        "newly_terminal": false,
+        "note": "Standalone frame with prior HTTP_HEAD/session state established; synthetic bytes, not actual TLS execution."
+      },
+      "request": {
+        "header": {
+          "magic": "LSP1",
+          "major": 1,
+          "minor": 0,
+          "opcode": 259,
+          "flags": 0,
+          "header_len": 64,
+          "reserved0": 0,
+          "frame_len": 247,
+          "meta_len": 183,
+          "request_id": "03030303030303030303030303030303",
+          "call_seq": "17",
+          "status": 0,
+          "payload_len": 0,
+          "reserved1": "0"
+        },
+        "metadata": {
+          "ta_epoch": "01010101010101010101010101010101",
+          "session_nonce": "02020202020202020202020202020202",
+          "input_kind": "none",
+          "tls_rx_offset": "77",
+          "net_tx_credit": 65536,
+          "app_rx_credit": 65536
+        },
+        "payload_hex": ""
+      },
+      "reply": {
+        "header": {
+          "magic": "LSP1",
+          "major": 1,
+          "minor": 0,
+          "opcode": 259,
+          "flags": 1,
+          "header_len": 64,
+          "reserved0": 0,
+          "frame_len": 32768,
+          "meta_len": 1167,
+          "request_id": "03030303030303030303030303030303",
+          "call_seq": "17",
+          "status": 0,
+          "payload_len": 31537,
+          "reserved1": "0"
+        },
+        "metadata": {
+          "ta_epoch": "01010101010101010101010101010101",
+          "session_nonce": "02020202020202020202020202020202",
+          "next_call_seq": "18",
+          "state": "HTTP_COMPLETE",
+          "error": null,
+          "result": null,
+          "progress": {
+            "accepted_input_bytes": 0,
+            "uploaded_body": "64",
+            "accepted_tls_rx": "77",
+            "emitted_tls_tx": "100",
+            "emitted_http_body": "31665",
+            "rx_credit": 0,
+            "net_tx_pending": false,
+            "http_body_pending": false,
+            "need_step": true,
+            "poll_after_ms": 0,
+            "events": [
+              {
+                "event_seq": "9",
+                "kind": "HTTP_BODY",
+                "offset": 0,
+                "length": 3943,
+                "stream_offset": "128"
+              },
+              {
+                "event_seq": "10",
+                "kind": "HTTP_BODY",
+                "offset": 3943,
+                "length": 3942,
+                "stream_offset": "4071"
+              },
+              {
+                "event_seq": "11",
+                "kind": "HTTP_BODY",
+                "offset": 7885,
+                "length": 3942,
+                "stream_offset": "8013"
+              },
+              {
+                "event_seq": "12",
+                "kind": "HTTP_BODY",
+                "offset": 11827,
+                "length": 3942,
+                "stream_offset": "11955"
+              },
+              {
+                "event_seq": "13",
+                "kind": "HTTP_BODY",
+                "offset": 15769,
+                "length": 3942,
+                "stream_offset": "15897"
+              },
+              {
+                "event_seq": "14",
+                "kind": "HTTP_BODY",
+                "offset": 19711,
+                "length": 3942,
+                "stream_offset": "19839"
+              },
+              {
+                "event_seq": "15",
+                "kind": "HTTP_BODY",
+                "offset": 23653,
+                "length": 3942,
+                "stream_offset": "23781"
+              },
+              {
+                "event_seq": "16",
+                "kind": "HTTP_BODY",
+                "offset": 27595,
+                "length": 3942,
+                "stream_offset": "27723"
+              }
+            ],
+            "terminal": null,
+            "connect_target": null
+          }
+        },
+        "payload_hex": "62626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262626262"
+      }
+    },
+    {
+      "name": "http_end_next_frame_after_body",
+      "op": "STEP",
+      "context": {
+        "request_bound": true,
+        "prior_emitted_http_body": 31665,
+        "newly_terminal": false,
+        "note": "Standalone frame with prior HTTP_HEAD/session state established; synthetic bytes, not actual TLS execution."
+      },
+      "request": {
+        "header": {
+          "magic": "LSP1",
+          "major": 1,
+          "minor": 0,
+          "opcode": 259,
+          "flags": 0,
+          "header_len": 64,
+          "reserved0": 0,
+          "frame_len": 247,
+          "meta_len": 183,
+          "request_id": "03030303030303030303030303030303",
+          "call_seq": "17",
+          "status": 0,
+          "payload_len": 0,
+          "reserved1": "0"
+        },
+        "metadata": {
+          "ta_epoch": "01010101010101010101010101010101",
+          "session_nonce": "02020202020202020202020202020202",
+          "input_kind": "none",
+          "tls_rx_offset": "77",
+          "net_tx_credit": 65536,
+          "app_rx_credit": 65536
+        },
+        "payload_hex": ""
+      },
+      "reply": {
+        "header": {
+          "magic": "LSP1",
+          "major": 1,
+          "minor": 0,
+          "opcode": 259,
+          "flags": 1,
+          "header_len": 64,
+          "reserved0": 0,
+          "frame_len": 628,
+          "meta_len": 564,
+          "request_id": "03030303030303030303030303030303",
+          "call_seq": "17",
+          "status": 0,
+          "payload_len": 0,
+          "reserved1": "0"
+        },
+        "metadata": {
+          "ta_epoch": "01010101010101010101010101010101",
+          "session_nonce": "02020202020202020202020202020202",
+          "next_call_seq": "18",
+          "state": "HTTP_COMPLETE",
+          "error": null,
+          "result": null,
+          "progress": {
+            "accepted_input_bytes": 0,
+            "uploaded_body": "64",
+            "accepted_tls_rx": "77",
+            "emitted_tls_tx": "100",
+            "emitted_http_body": "31665",
+            "rx_credit": 0,
+            "net_tx_pending": false,
+            "http_body_pending": false,
+            "need_step": false,
+            "poll_after_ms": 0,
+            "events": [
+              {
+                "event_seq": "17",
+                "kind": "HTTP_END",
+                "offset": 0,
+                "length": 0,
+                "details": {
+                  "framing": "complete",
+                  "body_bytes": "31665"
+                }
+              }
+            ],
+            "terminal": null,
+            "connect_target": null
+          }
+        },
+        "payload_hex": ""
+      }
+    },
+    {
+      "name": "fatal_with_zero_app_credit_discards_pending",
+      "op": "STEP",
+      "context": {
+        "request_bound": true,
+        "prior_emitted_http_body": 128,
+        "newly_terminal": true,
+        "note": "Standalone frame with prior HTTP_HEAD/session state established; synthetic bytes, not actual TLS execution.",
+        "ta_pending_body_discarded": 37
+      },
+      "request": {
+        "header": {
+          "magic": "LSP1",
+          "major": 1,
+          "minor": 0,
+          "opcode": 259,
+          "flags": 0,
+          "header_len": 64,
+          "reserved0": 0,
+          "frame_len": 281,
+          "meta_len": 217,
+          "request_id": "03030303030303030303030303030303",
+          "call_seq": "17",
+          "status": 0,
+          "payload_len": 0,
+          "reserved1": "0"
+        },
+        "metadata": {
+          "ta_epoch": "01010101010101010101010101010101",
+          "session_nonce": "02020202020202020202020202020202",
+          "input_kind": "network_error",
+          "tls_rx_offset": "77",
+          "net_tx_credit": 65536,
+          "app_rx_credit": 0,
+          "network_error_code": "reset"
+        },
+        "payload_hex": ""
+      },
+      "reply": {
+        "header": {
+          "magic": "LSP1",
+          "major": 1,
+          "minor": 0,
+          "opcode": 259,
+          "flags": 1,
+          "header_len": 64,
+          "reserved0": 0,
+          "frame_len": 1105,
+          "meta_len": 1041,
+          "request_id": "03030303030303030303030303030303",
+          "call_seq": "17",
+          "status": 5123,
+          "payload_len": 0,
+          "reserved1": "0"
+        },
+        "metadata": {
+          "ta_epoch": "01010101010101010101010101010101",
+          "session_nonce": "02020202020202020202020202020202",
+          "next_call_seq": "18",
+          "state": "FAILED",
+          "error": {
+            "code": "E_NETWORK",
+            "stage": "network",
+            "retry": "none"
+          },
+          "result": null,
+          "progress": {
+            "accepted_input_bytes": 0,
+            "uploaded_body": "64",
+            "accepted_tls_rx": "77",
+            "emitted_tls_tx": "100",
+            "emitted_http_body": "128",
+            "rx_credit": 0,
+            "net_tx_pending": false,
+            "http_body_pending": false,
+            "need_step": false,
+            "poll_after_ms": 0,
+            "events": [
+              {
+                "event_seq": "9",
+                "kind": "REQUEST_END",
+                "offset": 0,
+                "length": 0,
+                "details": {
+                  "end_reason": "transport_error",
+                  "http_framing": "in_progress",
+                  "tls_phase": "failed",
+                  "close_notify_received": false,
+                  "request_application_bytes_generated": "64",
+                  "emitted_http_body": "128",
+                  "app_resources": "released",
+                  "manager_cleanup": "not_asserted"
+                }
+              }
+            ],
+            "terminal": {
+              "end_reason": "transport_error",
+              "http_framing": "in_progress",
+              "tls_phase": "failed",
+              "close_notify_received": false,
+              "request_application_bytes_generated": "64",
+              "emitted_http_body": "128",
+              "app_resources": "released",
+              "manager_cleanup": "not_asserted"
+            },
+            "connect_target": null
+          }
+        },
+        "payload_hex": ""
+      }
+    },
+    {
+      "name": "status_terminal_snapshot_without_event",
+      "op": "STATUS",
+      "context": {
+        "request_bound": true,
+        "prior_emitted_http_body": 128,
+        "newly_terminal": false,
+        "note": "Standalone frame with prior HTTP_HEAD/session state established; synthetic bytes, not actual TLS execution."
+      },
+      "request": {
+        "header": {
+          "magic": "LSP1",
+          "major": 1,
+          "minor": 0,
+          "opcode": 262,
+          "flags": 0,
+          "header_len": 64,
+          "reserved0": 0,
+          "frame_len": 162,
+          "meta_len": 98,
+          "request_id": "03030303030303030303030303030303",
+          "call_seq": "17",
+          "status": 0,
+          "payload_len": 0,
+          "reserved1": "0"
+        },
+        "metadata": {
+          "ta_epoch": "01010101010101010101010101010101",
+          "session_nonce": "02020202020202020202020202020202"
+        },
+        "payload_hex": ""
+      },
+      "reply": {
+        "header": {
+          "magic": "LSP1",
+          "major": 1,
+          "minor": 0,
+          "opcode": 262,
+          "flags": 1,
+          "header_len": 64,
+          "reserved0": 0,
+          "frame_len": 741,
+          "meta_len": 677,
+          "request_id": "03030303030303030303030303030303",
+          "call_seq": "17",
+          "status": 0,
+          "payload_len": 0,
+          "reserved1": "0"
+        },
+        "metadata": {
+          "ta_epoch": "01010101010101010101010101010101",
+          "session_nonce": "02020202020202020202020202020202",
+          "next_call_seq": "18",
+          "state": "CANCELLED",
+          "error": null,
+          "result": null,
+          "progress": {
+            "accepted_input_bytes": 0,
+            "uploaded_body": "64",
+            "accepted_tls_rx": "77",
+            "emitted_tls_tx": "100",
+            "emitted_http_body": "128",
+            "rx_credit": 0,
+            "net_tx_pending": false,
+            "http_body_pending": false,
+            "need_step": false,
+            "poll_after_ms": 0,
+            "events": [],
+            "terminal": {
+              "end_reason": "cancelled",
+              "http_framing": "in_progress",
+              "tls_phase": "failed",
+              "close_notify_received": false,
+              "request_application_bytes_generated": "64",
+              "emitted_http_body": "128",
+              "app_resources": "released",
+              "manager_cleanup": "not_asserted"
+            },
+            "connect_target": null
+          }
+        },
+        "payload_hex": ""
+      }
+    }
+  ],
+  "capacity_fixture": {
+    "name": "capacity_only_GP_reply",
+    "p1_capacity": 32767,
+    "teec_result": 0,
+    "p1_size": 0,
+    "p2_a": 4097,
+    "p2_b": 32768,
+    "lsp_frame": null,
+    "call_seq_consumed": false,
+    "business_side_effect": false
+  }
+}

@@ -1,0 +1,14 @@
+/target
+/Cargo.lock
+/artifacts
+/corpus
+
+# WFUZZ build artifacts (fuzz_build.sh)
+/entrypoints.json
+/entrypoints_list.txt
+/wfuzz-fuzz-targets/
+/wfuzz-test-*
+
+# cargo-fuzz 本地产物
+/coverage
+/.cov*

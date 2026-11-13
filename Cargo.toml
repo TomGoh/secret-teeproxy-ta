@@ -1,0 +1,53 @@
+[package]
+name = "secret-teeproxy-ta"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+build = "build.rs"
+
+[workspace]
+resolver = "3"
+members = [".", "vendor/xtee-utee", "vendor/xtee-utee-macros", "vendor/xtee-utee-build", "vendor/rust-libutee"]
+default-members = ["."]
+
+[workspace.dependencies]
+teec-protocol = "0.2"
+uuid = "1"
+hex = "0.4"
+num_enum = "0.7"
+quote = "1"
+syn = "2"
+
+[features]
+default = []
+tee = ["dep:buddy_system_allocator", "dep:xtee-utee", "dep:rust_libutee", "dep:xtee-utee-build"]
+
+[dependencies]
+buddy_system_allocator = { version = "=0.10.0", default-features = false, features = ["use_spin"], optional = true }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+base64 = "0.22"
+uuid = { version = "1", features = ["v4"] }
+rustls = { version = "0.23", default-features = false, features = ["std", "ring", "tls12"] }
+webpki-roots = "1"
+libc = "0.2"
+zeroize = "1"
+url = "=2.5.4"
+xtee-utee = { path = "vendor/xtee-utee", optional = true }
+rust_libutee = { package = "rust-libutee", path = "vendor/rust-libutee", default-features = false, features = ["xtee-panic-notify"], optional = true }
+
+[build-dependencies]
+xtee-utee-build = { path = "vendor/xtee-utee-build", optional = true }
+
+[dev-dependencies]
+buddy_system_allocator = { version = "=0.10.0", default-features = false, features = ["use_spin"] }
+rcgen = "0.14"
+
+[patch.crates-io]
+rust-libutee = { path = "vendor/rust-libutee" }
+
+[[bin]]
+name = "secret-teeproxy-ta"
+path = "src/main.rs"
+required-features = ["tee"]

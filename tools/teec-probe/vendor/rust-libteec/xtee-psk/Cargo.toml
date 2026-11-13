@@ -1,0 +1,19 @@
+[package]
+name = "xtee-psk"
+version = "0.2.2"
+authors = ["huanfuxi <huanfuxi@kylinos.cn>"]
+edition = "2024"
+license = "Apache-2.0"
+description = "PSK negotiation protocol helpers for xtee"
+repository = "https://gitee.com/openkylin/rust-libteec"
+
+[dependencies]
+rand = { version = "0.10", default-features = false, features = ["std_rng", "sys_rng"] }
+virga = { version = "0.1", default-features = false, features = ["use-xtransport"] }
+zeroize = { version = "1.8", default-features = false }
+# 0.1.5 移除了 `impl KeyAgreement for Sm2KepKeypair`，SM2 的 ECDH 改走
+# `tee_ops::ecc::ecc_shared_secret`。该函数返回的是**原始共享秘密：32 字节，
+# 即 ECDH 交点（共享点）的 x 坐标，未哈希**——不是完整的 64 字节共享点。
+# 本 crate 自行对它补一次 SM3，才能与 0.1.4 的派生结果逐字节一致；
+# 若误改为对 x||y 或完整点做哈希，互通即被静默破坏。
+tee_crypto = { version = "0.1.5", default-features = false, features = ["alloc"] }

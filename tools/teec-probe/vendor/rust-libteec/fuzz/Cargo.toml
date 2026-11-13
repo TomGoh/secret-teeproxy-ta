@@ -1,0 +1,144 @@
+[package]
+name = "rust-libteec-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+arbitrary = { version = "1", features = ["derive"] }
+uuid = "1.19"
+postcard = { version = "1.1", features = ["alloc"] }
+bytemuck = "1.23"
+# 仅用于给协商类 target 提供可复现的确定性随机源（`StdRng::seed_from_u64`），
+# 与 xtee-psk 使用的 rand 版本一致，保证是同一个 crate 实例。
+rand = { version = "0.10", default-features = false, features = ["std_rng"] }
+
+# 直接依赖真实产品 crate（使 Wfuzz 平台按产品包归属统计被测代码）
+# `fuzz` feature 只在此处启用：它额外暴露 src/teec/fuzz_api.rs 的转发层
+# （薄包装到 pub(crate)/pub(super) 的真实实现，不复制产品逻辑），
+# 产品构建（Makefile / debian/build.sh 的 cargo build --release --lib）不带该
+# feature，C ABI 与导出符号集因此完全不变。默认 feature 保持开启，
+# 使 fuzz 构建与产品默认配置（debug_level_2 + ca-sign-verify）一致。
+[dependencies.rust-libteec]
+path = ".."
+features = ["fuzz"]
+
+[dependencies.teec-protocol]
+path = "../teec-protocol"
+
+[dependencies.xtee-psk]
+path = "../xtee-psk"
+
+# 独立的 workspace：避免被主仓库（rust-libteec workspace）吸收，
+# 导致主目录 cargo build/test 连带编译 fuzz 目录。
+[workspace]
+members = ["."]
+
+[[bin]]
+name = "fuzz_tee_request"
+path = "fuzz_targets/fuzz_tee_request.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_tee_response"
+path = "fuzz_targets/fuzz_tee_response.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_packet_header"
+path = "fuzz_targets/fuzz_packet_header.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_uuid"
+path = "fuzz_targets/fuzz_uuid.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_error_code"
+path = "fuzz_targets/fuzz_error_code.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_param_codec"
+path = "fuzz_targets/fuzz_param_codec.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_config"
+path = "fuzz_targets/fuzz_config.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_teec_trace"
+path = "fuzz_targets/fuzz_teec_trace.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_operation_validate"
+path = "fuzz_targets/fuzz_operation_validate.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_shared_memory"
+path = "fuzz_targets/fuzz_shared_memory.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_operation_params"
+path = "fuzz_targets/fuzz_operation_params.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_c_api"
+path = "fuzz_targets/fuzz_c_api.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_vmem"
+path = "fuzz_targets/fuzz_vmem.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_psk_negotiate"
+path = "fuzz_targets/fuzz_psk_negotiate.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_ca_auth"
+path = "fuzz_targets/fuzz_ca_auth.rs"
+test = false
+doc = false
+bench = false

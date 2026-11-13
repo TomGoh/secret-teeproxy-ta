@@ -1,0 +1,8 @@
+[package]
+name = "teec-api-types"
+version = "0.1.2"
+authors = ["huanfuxi <huanfuxi@kylinos.cn>"]
+edition = "2024"
+license = "Apache-2.0"
+description = "Common Rust API types for interacting with TEE Client (libteec)."
+repository = "https://gitee.com/openkylin/rust-libteec"

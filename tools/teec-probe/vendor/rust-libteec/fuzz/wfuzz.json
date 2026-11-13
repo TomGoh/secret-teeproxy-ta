@@ -1,0 +1,14 @@
+{
+  "project": "rust-libteec",
+  "product": "code",
+  "language": "rust",
+  "build": {
+    "helper": "cargo-fuzz",
+    "config": {
+      "module_root": "."
+    },
+    "match": []
+  },
+  "fuzz": {
+  }
+}

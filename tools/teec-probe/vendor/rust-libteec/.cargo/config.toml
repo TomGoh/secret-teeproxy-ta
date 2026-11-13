@@ -1,0 +1,15 @@
+# Android aarch64 交叉编译的链接器配置
+#
+# 1. -soname: Rust cdylib 默认不设置 DT_SONAME，导致 AOSP 中链接此 .so 的二进制
+#    的 DT_NEEDED 记录完整构建路径而非库名，运行时动态链接器找不到库。
+#    设置 SONAME 后，DT_NEEDED 只记录 "libcc_teec.so"，链接器在 /vendor/lib64/ 中查找。
+#
+# 2. -z,max-page-size=16384: AOSP arm64 要求共享库的 ELF LOAD 段对齐为 16KB，
+#    Rust 默认使用 4KB 对齐，check_elf_file 检查会报错：
+#    "Load segment has alignment 4096 but 16384 required"
+
+[target.aarch64-linux-android]
+rustflags = [
+    "-C", "link-args=-Wl,-soname,libcc_teec.so",
+    "-C", "link-args=-Wl,-z,max-page-size=16384",
+]

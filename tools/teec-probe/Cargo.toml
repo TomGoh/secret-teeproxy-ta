@@ -1,0 +1,36 @@
+[package]
+name = "lsp-teec-probe"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+
+[lib]
+name = "lsp_backup_ca"
+crate-type = ["rlib", "cdylib"]
+
+[features]
+default = ["cli"]
+cli = []
+
+[[bin]]
+name = "lsp-teec-probe"
+path = "src/main.rs"
+required-features = ["cli"]
+
+[workspace]
+exclude = ["vendor/rust-libteec"]
+
+[dependencies]
+secret-teeproxy-ta = { path = "../.." }
+cc_teec = { package = "rust-libteec", path = "vendor/rust-libteec", default-features = false, features = ["debug_level_0", "ca-sign-verify"] }
+# tee_crypto 0.1.5 requires rsa::pkcs1v15 with rsa 0.10 final.
+rsa = { version = "0.10", default-features = false, features = ["pkcs1v15"] }
+serde_json = "1"
+serde = { version = "1", features = ["derive"] }
+zeroize = "1"
+log = "0.4"
+sha2 = "0.10"
+uuid = { version = "1", features = ["v4"] }
+
+[profile.release]
+strip = true

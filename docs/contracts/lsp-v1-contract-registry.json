@@ -1,0 +1,139 @@
+{
+  "status": "implemented_provider_extension_in_validation",
+  "protocol": "LSP/1.0",
+  "ta_uuid": "c86d23b9-e568-509e-a9b2-0ad40668caf5",
+  "gp_command": 4096,
+  "gp_param_types": 613,
+  "header_struct": "<4sHHHHHHII16sQIIQ",
+  "header_bytes": 64,
+  "magic_ascii": "LSP1",
+  "input_frame_max": 61440,
+  "output_frame_max": 32768,
+  "metadata_max": 4096,
+  "json_depth_max": 8,
+  "event_count_max": 8,
+  "opcodes": {
+    "HELLO": 1,
+    "CREDENTIAL_PUT": 16,
+    "CREDENTIAL_QUERY": 17,
+    "CREDENTIAL_DELETE": 18,
+    "REQUEST_OPEN": 256,
+    "BODY_CHUNK": 257,
+    "BODY_COMMIT": 258,
+    "STEP": 259,
+    "FINISH": 260,
+    "CANCEL": 261,
+    "STATUS": 262
+  },
+  "statuses": {
+    "OK": 0,
+    "E_OUTPUT_CAPACITY": 4097,
+    "E_WIRE_FORMAT": 4098,
+    "E_VERSION": 4099,
+    "E_ROLE": 4100,
+    "E_STATE": 4353,
+    "E_STALE_EPOCH": 4354,
+    "E_SEQUENCE": 4355,
+    "E_REQUEST_ID": 4356,
+    "E_CREDENTIAL_NOT_FOUND": 4609,
+    "E_VERSION_CONFLICT": 4610,
+    "E_OPERATION_CONFLICT": 4611,
+    "E_PROFILE_DENIED": 4612,
+    "E_STORAGE": 4613,
+    "E_CREDENTIAL_REVOKED": 4614,
+    "E_STORAGE_NOT_COMMITTED": 4615,
+    "E_BUSY": 4865,
+    "E_LIMIT": 4866,
+    "E_BODY_LENGTH": 4867,
+    "E_BODY_OFFSET": 4868,
+    "E_BODY_DIGEST": 4869,
+    "E_TLS": 5121,
+    "E_HTTP_PARSE": 5122,
+    "E_NETWORK": 5123,
+    "E_DEADLINE": 5124,
+    "E_HTTP_LIMIT": 5125,
+    "E_INTERNAL": 8191
+  },
+  "event_kinds": [
+    "NET_TX",
+    "HTTP_HEAD",
+    "HTTP_BODY",
+    "HTTP_END",
+    "REQUEST_END"
+  ],
+  "network_error_codes": [
+    "dns_failed",
+    "connect_failed",
+    "connect_timeout",
+    "read_failed",
+    "write_failed",
+    "reset",
+    "idle_timeout"
+  ],
+  "production_profile": {
+    "id": "deepseek-prod-v1",
+    "origin": "https://api.deepseek.com",
+    "port": 443,
+    "sni": "api.deepseek.com",
+    "alpn": "http/1.1",
+    "operations": {
+      "CHAT": {
+        "method": "POST",
+        "path": "/chat/completions",
+        "auth": "bearer"
+      },
+      "RESPONSES": {
+        "method": "POST",
+        "path": "/responses",
+        "auth": "bearer"
+      },
+      "MESSAGES": {
+        "method": "POST",
+        "path": "/anthropic/v1/messages",
+        "auth": "x_api_key"
+      },
+      "MODELS": {
+        "method": "GET",
+        "path": "/models",
+        "auth": "bearer"
+      }
+    }
+  },
+  "backend_endpoint": {
+    "cid_source": "observed_current_AVF_VM",
+    "port": 10099,
+    "status": "deployed_debug_vm_dynamic_cid"
+  },
+  "note": "Resource limits beyond framing require device implementation validation. UUID is a proposed identifier, not authorization. This is not a full metadata schema.",
+  "custom_provider_profile": {
+    "id": "custom-provider-v1",
+    "credential_field": "provider_config",
+    "provider_types": [
+      "openai_compatible",
+      "openai_responses",
+      "anthropic_messages",
+      "google_gemini",
+      "ollama_native"
+    ],
+    "base_url_scheme": "https",
+    "base_url_utf8_max": 1024,
+    "auth_binding": "credential_snapshot",
+    "operations": [
+      "CHAT",
+      "RESPONSES",
+      "MESSAGES",
+      "GENERATE",
+      "OLLAMA_CHAT",
+      "MODELS"
+    ],
+    "gemini_model_field": "model_id",
+    "response_modes": [
+      "json",
+      "sse",
+      "ndjson"
+    ]
+  },
+  "legacy_input_frame_max": 16384,
+  "bulk_input_feature": "bulk_input_frames",
+  "gp_input_echo": false
+}

@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright (C) 2026 KylinSoft Co., Ltd. <https://www.kylinos.cn/>
+
+[package]
+name = "xtee-utee-macros"
+description = "Procedural macros for xTEE Trusted Application model."
+version = "0.2.0"
+authors = ["yubo <yubo1@kylinos.cn>"]
+license = "Apache-2.0"
+repository = "https://gitee.com/openkylin/xtee-rust-sdk.git"
+edition = "2024"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+quote.workspace = true
+syn = { workspace = true, features = ["full"] }
+proc-macro2 = "1"

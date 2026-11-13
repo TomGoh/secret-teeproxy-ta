@@ -1,0 +1,11 @@
+# Limited cooperative Invoke timeout
+
+The private manager-to-TA request appends `InvokeCommandWithTimeout` as postcard variant 4: `(session_id: u32, cmd_id: u32, params: Parameters, deadline_ns: u64)`. Variants 0–3 and all responses retain the teec-protocol 0.2 byte layout. The deadline is absolute guest CLOCK_MONOTONIC nanoseconds, computed at the caller syscall entry. Queuing never restarts it. Zero is finite; an unlimited Invoke uses the legacy request.
+
+The session worker installs the deadline through x-kernel private syscall 572 immediately before `TrustedApplication::invoke_command`. Operations 0/1/2 install/end/start-unlimited. RAII removes cancellation and deadline on every ordinary result before the worker replies. The thread's cancellation mask and crypto/storage objects survive. Other session workers have independent state. The scope is on the execution worker, rather than its socket reader.
+
+On x-kernel, `TEE_Wait` sleeps until its delay or visible cancellation deadline and `TEE_GetCancellationFlag` observes the same deadline. Cancellation is masked by default; the TA must unmask it. This is cooperative: CPU loops and arbitrary blocking calls are not interrupted, cancellation does not propagate into another TA, and OpenSession or external RequestCancellation have no new semantics. The existing control transport budget can expire first. The manager forwards a target CANCEL with TRUSTED_APP origin and releases its in-flight permit only after the target replies or transport fails.
+
+Syscall 572 changes only the calling thread's cancellation fields. A TA can choose its own cancellation behavior; the deadline is not an authorization boundary. Old kernels returning ENOSYS permit legacy requests, while timed requests return NOT_SUPPORTED. Old TA runtimes cannot decode variant 4 and fail communication; the manager never retries as unlimited. Deploy kernel, manager and rebuilt target TAs together.
+
+Host tests pin all legacy requests and timed bytes, verify worker reuse after cancellation and thread isolation. Kernel and actual guest evidence is recorded in x-kernel `.scratch/limited-invoke-timeout/` and `docs/superpowers/specs/2026-10-28-limited-invoke-timeout-design.md`.

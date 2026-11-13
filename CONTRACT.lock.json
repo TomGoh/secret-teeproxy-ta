@@ -1,0 +1,96 @@
+{
+  "mvp": "0.5",
+  "protocol": "LSP/1.0",
+  "max_concurrent_requests": 4,
+  "product_implementation": false,
+  "files": [
+    {
+      "path": "docs/contracts/ca-ta-protocol-v1-draft.md",
+      "source": "docs/design/ca-ta-protocol-v1-draft.md",
+      "sha256": "8efedf947d429ac0cf6791b0ba058c3fd164fcd57628d8c046a3b4a9b157a6eb"
+    },
+    {
+      "path": "docs/contracts/lsp-v1-contract-registry.json",
+      "source": "docs/design/lsp-v1-contract-registry.json",
+      "sha256": "e24fa36025946a5288fd97bedea0c3e8b7d636f121bd92ef7dc7c1ce7775bbc3"
+    },
+    {
+      "path": "docs/contracts/lsp-v1-metadata.schema.json",
+      "source": "docs/design/lsp-v1-metadata.schema.json",
+      "sha256": "fdde9152f2f81c697d8bc987edbb0ba6bea43ab68d74554f989e7c5cbd143030"
+    },
+    {
+      "path": "docs/contracts/lsp-v1-business-examples.json",
+      "source": "docs/design/lsp-v1-business-examples.json",
+      "sha256": "3fa86f5e8798b3c06ff0d30db5220b112f0ff644ccd25124ffaec73b349eaf58"
+    },
+    {
+      "path": "docs/contracts/lsp-v1-edge-examples.json",
+      "source": "docs/design/lsp-v1-edge-examples.json",
+      "sha256": "a3a1797624c88b916cdcaad33dbe42006c3276061faed7230c9208cf4016409d"
+    },
+    {
+      "path": "docs/contracts/lsp-ca-ffi-v1-draft.h",
+      "source": "docs/design/lsp-ca-ffi-v1-draft.h",
+      "sha256": "8690ae40d02405ab3507348ced2fc975d1b231a886f7116ea27f99c69b7741fc"
+    },
+    {
+      "path": "docs/contracts/ca-local-contract-v1.md",
+      "source": "docs/design/ca-local-contract-v1.md",
+      "sha256": "60e3a16745ca2905d7af39cb36a34ec5a65e4195c3034aa8ce597ecf0d5fa46d"
+    },
+    {
+      "path": "docs/contracts/ca-local-contract-v1.schema.json",
+      "source": "docs/design/ca-local-contract-v1.schema.json",
+      "sha256": "c552d6db66002817815901cbd7b3b58c18ca8f7760ee25c9f4784839ed08d89e"
+    },
+    {
+      "path": "docs/contracts/sdk-manager-lifecycle-v1.md",
+      "source": "docs/design/sdk-manager-lifecycle-v1.md",
+      "sha256": "07b6e898d14f6db65724c27e4586928f6b267f1e5b4339d2a62d743f286a9751"
+    },
+    {
+      "path": "docs/contracts/credential-store-v1.md",
+      "source": "docs/design/credential-store-v1.md",
+      "sha256": "332d8affeda41d30e6dc0fb7fdf3e0a38d4cf43503de146ce4414e00a310cbe2"
+    },
+    {
+      "path": "docs/contracts/ca-jni-lifecycle-v0.1.md",
+      "source": "docs/design/ca-jni-lifecycle-v0.1.md",
+      "sha256": "dc8fd9cf895d3f9379797d98e01ea99b9373a131cde0903699c930deb8ebf021"
+    },
+    {
+      "path": "docs/contracts/ca-outcome-observer-v1.md",
+      "source": "docs/design/ca-outcome-observer-v1.md",
+      "sha256": "0437cef634b617e4bbc5d164a530fe2e0c26f1cdb8bb6dd7b667147a051cfe44"
+    },
+    {
+      "path": "docs/contracts/lsp-mvp-profile-v0.5.json",
+      "source": "docs/design/lsp-mvp-profile-v0.5.json",
+      "sha256": "6515c50be809e0479691848a2a84e31aad1fe0e52b5f30c69a1aae7e77463392"
+    },
+    {
+      "path": "docs/contracts/lsp-provider-profile-v0.6.json",
+      "source": "docs/design/lsp-provider-profile-v0.6.json",
+      "sha256": "939e0af1d9d75d219b343b94bb084e2a088b9e805436532aeadc908d1e0ca415"
+    },
+    {
+      "path": "docs/provider-expansion-v0.6.md",
+      "source": "docs/design/provider-expansion-v0.6.md",
+      "sha256": "0ab6a1011b9dfc764133cc30f28530aee8d74f6c5769626951b153710d9aea5d"
+    },
+    {
+      "path": "docs/requirements-provider-expansion-v0.6.md",
+      "source": "docs/requirements/provider-expansion-v0.6.md",
+      "sha256": "c6c384e12844dcfdc049b84af4c79b59e3c5c954ba66b7c0f73cd5a81b99130e"
+    },
+    {
+      "path": "docs/provider-expansion-acceptance-v0.6.md",
+      "source": "docs/testing/provider-expansion-acceptance-v0.6.md",
+      "sha256": "d91a17f2c98e789a326c62a92f8f839260f1352e9c4f3ebf8bd475bdbf2d6a85"
+    }
+  ],
+  "implementation_profile": "provider-expansion-v0.6",
+  "provider_extension": "0.6",
+  "status": "demo_device_accepted"
+}

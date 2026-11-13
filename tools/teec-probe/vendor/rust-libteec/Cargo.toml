@@ -1,0 +1,50 @@
+[workspace]
+members = [".", "teec-api-types", "teec-protocol", "xtee-psk"]
+resolver = "2"
+
+[package]
+name = "rust-libteec"
+version = "0.6.8"
+authors = ["huanfuxi <huanfuxi@kylinos.cn>"]
+edition = "2024"
+license = "Apache-2.0"
+description = "Rust implementation of TEE Client API for secure communication with Trusted Applications."
+repository = "https://gitee.com/openkylin/rust-libteec"
+
+[lib]
+name = "cc_teec"
+crate-type = [ "cdylib", "staticlib", "lib" ]
+
+[dependencies]
+libc = "0.2"
+log = "0.4"
+env_logger = "0.11"
+dashmap = "6.2"
+postcard = { version = "1.1", default-features = false, features = ["alloc"] }
+mbedtls-smx = { version = "0.13", default-features = false, features = ["std", "ssl"] }
+uuid = { version = "1.19", features = ["v4"] }
+virga = { version = "0.1", default-features = false, features = ["use-xtransport"] }
+num_enum = { version = "0.7", default-features = false }
+tasign = { version = "0.2", default-features = false, features = ["std", "backend-rustcrypto"], optional = true }
+teec-api-types = { path = "./teec-api-types", version = "0.1" }
+teec-protocol = { path = "./teec-protocol", version = "0.2" }
+xtee-psk = { path = "./xtee-psk", version = "0.2" }
+
+[features]
+default = ["debug_level_2", "ca-sign-verify"]
+
+# Wfuzz 模糊测试专用：暴露内部函数供 fuzzer 直接调用（见 src/lib.rs 的 fuzz 模块），
+# 产品构建不启用。
+fuzz = []
+# Explicit test client only; never changes the production client.
+attack-test = []
+debug_level_0 = []
+debug_level_1 = []
+debug_level_2 = []
+debug_level_3 = []
+debug_level_4 = []
+ca-sign-verify = ["dep:tasign"]
+
+# 开发调试用：启用 tasign 内置测试根证书，支持 TEST 签名 ELF 的证书链验证。
+# 默认不启用，编译期嵌入生产根证书（certs/kylin-xtee-ca-sign-root.pem）。
+test-root-ca = ["ca-sign-verify"]
