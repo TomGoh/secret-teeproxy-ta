@@ -43,6 +43,20 @@ The raw configuration's expected_version is a JSON integer. The library encodes 
 
 The Java class uses a dedicated request executor and futures, plus a shared cleanup reaper. A synchronized lifecycle gate selects one terminal winner for Raw completion, cancellation and close. One call may be pending per client. Public cancellation and close are idempotent. `cancel()` atomically signals the SDK owner independently of an occupied Invoke. The raw pump observes the flag at bounded network/relay points and sends business CANCEL when possible. An occupied SDK Invoke retains all memory until it returns. `closeAsync()` also signals that flag and its future completes after the SDK owner has returned from CloseSession and FinalizeContext. `isReleased()` reports this local cleanup fact. The TA's manager_cleanup value remains not_asserted.
 
+## Trusted service health observation
+
+`BackupTeeClient.probeHealthBlocking(cid, port)` runs one short-lived management HELLO on the calling background thread. JNI calls `lsp_native_probe_health` directly. This operation owns its SDK context and GP session through actual CloseSession/FinalizeContext return, then returns at most 2048 bytes of UTF-8 JSON. The TA protocol and existing request APIs retain their version and layout.
+
+The service caller serializes probes and keeps its in-flight worker owned through actual return. An eight-second UI observation deadline can publish a timeout snapshot while the same worker continues its SDK call or cleanup. The caller releases its probe quota after the blocking method returns. Each finished probe retains zero GP sessions.
+
+The response contains `schema_version=1`, `manager_connected`, `ta_state`, `reason`, `stage`, `probe_duration_us` and `sdk_cleanup_returned=true`. `sdk_code`, `sdk_origin` and `ta_epoch` are optional. `ta_state` is `ready`, `busy` or `unavailable`. `manager_connected` reports the observed SDK connection. Initialization performs VSOCK/ECDH/TLS immediately. A later communication failure clears that observation conservatively. HELLO validates the selected version, management role, HELLO_READY state, zero payload, epoch/nonce syntax and existing GP/frame/sequence associations.
+
+With the pinned SDK, COMMS origin identifies CA-to-manager transport loss. A received remote OpenSession error uses TEE origin and a remote Invoke error normally uses API origin. Their COMMUNICATION result can describe manager-to-TA forwarding failure, so health preserves the manager connection and reports the TA unavailable. A COMMUNICATION error with an unrecognized origin conservatively reports the manager disconnected.
+
+The finite reasons are `NONE`, `INVALID_ENDPOINT`, `ENDPOINT_CONFLICT`, `CONNECTION_FAILED`, `TA_BUSY`, `TA_OPEN_FAILED`, `HELLO_FAILED` and `PROTOCOL_MISMATCH`. Stages are `complete`, `endpoint`, `initialize_context`, `open_session`, `hello` and `protocol`. Endpoint conflict means the process-local SDK endpoint has already been fixed to another value. The UI can map this to connection recreation using the established deployment flow.
+
+Health observation performs no credential command or provider request. GP Open may demand-start the TA. HELLO establishes TA responsiveness after its startup vault load. Current protection enablement and the App's CA attachment state are separate application observations.
+
 ## Incremental Android response delivery
 
 `streamCall(configBytes, bodyBytes, listener)` uses the same request pump. `StreamListener.onHead(byte[])` receives the original HTTP_HEAD JSON with status and response headers. `onBody(byte[])` receives original body bytes in order, before the HTTP response completes. Chunk boundaries may split UTF-8 characters, JSON tokens, SSE lines and provider events. Incremental parsers retain the required small parsing state across callbacks.

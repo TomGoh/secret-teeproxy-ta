@@ -63,6 +63,51 @@ fn invoke_failure(rc: u32, origin: u32, request: &[u8], capacity: usize) -> Stri
     message
 }
 
+#[derive(Debug, Clone)]
+struct OpenFailure {
+    stage: &'static str,
+    code: u32,
+    origin: Option<u32>,
+    manager_connected: bool,
+}
+
+fn communication_failed(code: u32, origin: Option<u32>) -> bool {
+    // The pinned SDK marks a received OpenSession failure as TEE and a received
+    // Invoke failure as API. Their COMMUNICATION code can describe manager-to-TA
+    // forwarding, while COMMS identifies a CA-to-manager transport failure.
+    origin == Some(raw::TEEC_ORIGIN_COMMS)
+        || (code == raw::TEEC_ERROR_COMMUNICATION
+            && !matches!(
+                origin,
+                Some(raw::TEEC_ORIGIN_API | raw::TEEC_ORIGIN_TEE | raw::TEEC_ORIGIN_TRUSTED_APP)
+            ))
+}
+
+impl OpenFailure {
+    fn message(&self) -> String {
+        match self.origin {
+            Some(origin) => format!("open_session rc={:#010x} origin={origin}", self.code),
+            None => format!("initialize_context rc={:#010x}", self.code),
+        }
+    }
+}
+
+#[derive(Debug)]
+struct InvokeFailure {
+    message: String,
+    code: Option<u32>,
+    origin: Option<u32>,
+}
+impl From<String> for InvokeFailure {
+    fn from(message: String) -> Self {
+        Self {
+            message,
+            code: None,
+            origin: None,
+        }
+    }
+}
+
 pub struct Teec {
     context: Box<raw::TEEC_Context>,
     session: raw::TEEC_Session,
@@ -70,16 +115,24 @@ pub struct Teec {
 }
 impl Teec {
     pub fn open() -> Result<Self> {
+        Self::open_detailed().map_err(|failure| failure.message())
+    }
+
+    fn open_detailed() -> std::result::Result<Self, OpenFailure> {
         let started = std::time::Instant::now();
         // The SDK stores this context address inside the session. The Box keeps
         // its address stable when the wrapper moves after OpenSession.
         let mut context = Box::new(unsafe { mem::zeroed::<raw::TEEC_Context>() });
         let mut session = unsafe { mem::zeroed::<raw::TEEC_Session>() };
         let rc = TEEC_InitializeContext(ptr::null(), context.as_mut());
-        require(
-            rc == raw::TEEC_SUCCESS,
-            &format!("initialize_context rc={rc:#010x}"),
-        )?;
+        if rc != raw::TEEC_SUCCESS {
+            return Err(OpenFailure {
+                stage: "initialize_context",
+                code: rc,
+                origin: None,
+                manager_connected: false,
+            });
+        }
         let uuid = Uuid::parse_str(TA_UUID).unwrap();
         let (low, mid, high, node) = uuid.as_fields();
         let destination = raw::TEEC_UUID {
@@ -100,7 +153,12 @@ impl Teec {
         );
         if rc != raw::TEEC_SUCCESS {
             TEEC_FinalizeContext(context.as_mut());
-            return Err(format!("open_session rc={rc:#010x} origin={origin}"));
+            return Err(OpenFailure {
+                stage: "open_session",
+                code: rc,
+                origin: Some(origin),
+                manager_connected: !communication_failed(rc, Some(origin)),
+            });
         }
         emit(json!({"check":"gp_open_session","ok":true}));
         Ok(Self {
@@ -114,6 +172,15 @@ impl Teec {
     }
 
     pub fn invoke(&mut self, request: &[u8], capacity: usize) -> Result<Invoke> {
+        self.invoke_detailed(request, capacity)
+            .map_err(|failure| failure.message)
+    }
+
+    fn invoke_detailed(
+        &mut self,
+        request: &[u8],
+        capacity: usize,
+    ) -> std::result::Result<Invoke, InvokeFailure> {
         let mut input = Zeroizing::new(request.to_vec());
         let mut output = vec![0u8; capacity];
         let mut operation = unsafe { mem::zeroed::<raw::TEEC_Operation>() };
@@ -144,7 +211,11 @@ impl Teec {
         self.metrics.invoke_max_us = self.metrics.invoke_max_us.max(duration);
         // Transport failure makes outputs unusable and this command is never replayed.
         if rc != raw::TEEC_SUCCESS {
-            return Err(invoke_failure(rc, origin, request, capacity));
+            return Err(InvokeFailure {
+                message: invoke_failure(rc, origin, request, capacity),
+                code: Some(rc),
+                origin: Some(origin),
+            });
         }
         let size = unsafe { operation.params[1].tmpref.size };
         let values = unsafe { operation.params[2].value };
@@ -162,6 +233,7 @@ impl Teec {
         Ok(Invoke::Reply(frame))
     }
 }
+
 impl Drop for Teec {
     fn drop(&mut self) {
         TEEC_CloseSession(&mut self.session);
@@ -261,6 +333,207 @@ fn upload_chunks(body: &[u8], chunk_size: usize) -> impl Iterator<Item = (usize,
         .map(move |(index, chunk)| (index * chunk_size, chunk))
 }
 
+fn exchange_hello(
+    teec: &mut Teec,
+    role: &str,
+    capacity_test: bool,
+    client_name: &str,
+) -> std::result::Result<Frame, InvokeFailure> {
+    let frame = Frame {
+        opcode: HELLO,
+        request_id: [0; 16],
+        call_seq: 1,
+        status: 0,
+        metadata: json!({"role":role,"supported_versions":[{"major":1,"minor":0}],
+            "client_name":client_name}),
+        payload: Vec::new(),
+    };
+    let bytes = encode_request(&frame)?;
+    if capacity_test {
+        require(
+            matches!(teec.invoke_detailed(&bytes, 1)?, Invoke::Capacity),
+            "expected output-capacity rejection",
+        )?;
+        emit(json!({"check":"output_capacity_same_sequence_retry","ok":true,"call_seq":"1"}));
+    }
+    match teec.invoke_detailed(&bytes, OUTPUT_FRAME_MAX)? {
+        Invoke::Reply(reply) => Ok(reply),
+        Invoke::Capacity => Err("full-capacity response rejected".to_owned().into()),
+    }
+}
+
+fn validate_hello(reply: &Frame, role: &str) -> Result<()> {
+    require(reply.status == OK, "HELLO business rejection")?;
+    require(
+        reply.opcode == HELLO && reply.request_id == [0; 16] && reply.call_seq == 1,
+        "HELLO header association",
+    )?;
+    require(reply.payload.is_empty(), "HELLO payload must be empty")?;
+    require(
+        reply.metadata["next_call_seq"] == "2",
+        "HELLO next sequence",
+    )?;
+    require(
+        reply.metadata["state"] == "HELLO_READY",
+        "HELLO state mismatch",
+    )?;
+    let result = &reply.metadata["result"];
+    require(
+        result["selected_version"]["major"] == 1 && result["selected_version"]["minor"] == 0,
+        "HELLO selected version mismatch",
+    )?;
+    require(result["role"] == role, "HELLO role mismatch")?;
+    for name in ["ta_epoch", "session_nonce"] {
+        let value = reply.metadata[name]
+            .as_str()
+            .ok_or_else(|| format!("HELLO {name} missing"))?;
+        require(
+            value.len() == 32
+                && value
+                    .bytes()
+                    .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte)),
+            "HELLO identity format",
+        )?;
+    }
+    Ok(())
+}
+
+pub const HEALTH_JSON_MAX: usize = 2048;
+
+#[derive(Debug, serde::Serialize)]
+struct HealthReport {
+    schema_version: u32,
+    manager_connected: bool,
+    ta_state: &'static str,
+    reason: &'static str,
+    stage: &'static str,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    sdk_code: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    sdk_origin: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    ta_epoch: Option<String>,
+    probe_duration_us: u64,
+    sdk_cleanup_returned: bool,
+}
+impl HealthReport {
+    fn unavailable(reason: &'static str, stage: &'static str) -> Self {
+        Self {
+            schema_version: 1,
+            manager_connected: false,
+            ta_state: "unavailable",
+            reason,
+            stage,
+            sdk_code: None,
+            sdk_origin: None,
+            ta_epoch: None,
+            probe_duration_us: 0,
+            sdk_cleanup_returned: true,
+        }
+    }
+    fn open_failure(failure: OpenFailure) -> Self {
+        let busy = failure.stage == "open_session" && failure.code == raw::TEEC_ERROR_BUSY;
+        let mut report = Self::unavailable(
+            if busy {
+                "TA_BUSY"
+            } else if failure.stage == "initialize_context" {
+                "CONNECTION_FAILED"
+            } else {
+                "TA_OPEN_FAILED"
+            },
+            failure.stage,
+        );
+        report.manager_connected = failure.manager_connected;
+        report.ta_state = if busy { "busy" } else { "unavailable" };
+        report.sdk_code = Some(failure.code);
+        report.sdk_origin = failure.origin;
+        report
+    }
+    fn encode(mut self, started: std::time::Instant) -> Result<Vec<u8>> {
+        self.probe_duration_us = elapsed_us(started);
+        let bytes = serde_json::to_vec(&self).map_err(|_| "health JSON encoding failed")?;
+        require(
+            bytes.len() <= HEALTH_JSON_MAX,
+            "health JSON exceeds capacity",
+        )?;
+        Ok(bytes)
+    }
+}
+
+fn probe_session<T>(
+    open: impl FnOnce() -> std::result::Result<T, OpenFailure>,
+    hello: impl FnOnce(&mut T) -> std::result::Result<Frame, InvokeFailure>,
+) -> HealthReport {
+    let mut session = match open() {
+        Ok(session) => session,
+        Err(failure) => return HealthReport::open_failure(failure),
+    };
+    let mut report = HealthReport::unavailable("HELLO_FAILED", "hello");
+    report.manager_connected = true;
+    match hello(&mut session) {
+        Ok(reply) if reply.status == E_BUSY => {
+            report.ta_state = "busy";
+            report.reason = "TA_BUSY";
+        }
+        Ok(reply) if reply.status != OK => {}
+        Ok(reply) => {
+            if validate_hello(&reply, "management").is_ok()
+                && negotiated_input_limits(&reply.metadata["result"]).is_ok()
+                && reply.metadata["result"]["limits"]["max_concurrent_requests"]
+                    .as_u64()
+                    .is_some_and(|limit| limit > 0)
+                && reply.metadata["result"]["limits"]["max_sessions"]
+                    .as_u64()
+                    .is_some_and(|limit| limit > 0)
+            {
+                report.ta_state = "ready";
+                report.reason = "NONE";
+                report.stage = "complete";
+                report.ta_epoch = reply.metadata["ta_epoch"].as_str().map(str::to_owned);
+            } else {
+                report.reason = "PROTOCOL_MISMATCH";
+                report.stage = "protocol";
+            }
+        }
+        Err(failure) => {
+            report.sdk_code = failure.code;
+            report.sdk_origin = failure.origin;
+            if failure
+                .code
+                .is_some_and(|code| communication_failed(code, failure.origin))
+            {
+                report.manager_connected = false;
+                report.reason = "CONNECTION_FAILED";
+            } else if failure.code == Some(raw::TEEC_ERROR_BUSY) {
+                report.ta_state = "busy";
+                report.reason = "TA_BUSY";
+            } else if failure.code.is_none() {
+                report.reason = "PROTOCOL_MISMATCH";
+                report.stage = "protocol";
+            }
+        }
+    }
+    // This calling thread retains every SDK object until Close/Finalize returns.
+    drop(session);
+    report
+}
+
+/// Blocking, credential-free health call for a dedicated service worker.
+/// The return follows actual SDK close/finalize. No async native handle is used.
+pub fn probe_health_blocking(cid: u32, port: u32) -> Result<Vec<u8>> {
+    let started = std::time::Instant::now();
+    if cid <= 2 || port == 0 {
+        return HealthReport::unavailable("INVALID_ENDPOINT", "endpoint").encode(started);
+    }
+    if cc_teec::configure_vsock_endpoint(cid, port).is_err() {
+        return HealthReport::unavailable("ENDPOINT_CONFLICT", "endpoint").encode(started);
+    }
+    probe_session(Teec::open_detailed, |teec| {
+        exchange_hello(teec, "management", false, "lsp-health-probe")
+    })
+    .encode(started)
+}
+
 pub struct Channel {
     pub teec: Teec,
     pub seq: u64,
@@ -289,26 +562,14 @@ impl Channel {
             input_frame_max: LEGACY_INPUT_FRAME_MAX,
             upload_chunk_size: LEGACY_UPLOAD_CHUNK,
         };
-        let frame = Frame {
-            opcode: HELLO,
-            request_id: [0; 16],
-            call_seq: 1,
-            status: 0,
-            metadata: json!({"role":role,"supported_versions":[{"major":1,"minor":0}],"client_name":"lsp-test-only-probe"}),
-            payload: Vec::new(),
-        };
-        let bytes = encode_request(&frame)?;
-        if capacity_test {
-            require(
-                matches!(channel.teec.invoke(&bytes, 1)?, Invoke::Capacity),
-                "expected output-capacity rejection",
-            )?;
-            emit(json!({"check":"output_capacity_same_sequence_retry","ok":true,"call_seq":"1"}));
-        }
-        let reply = match channel.teec.invoke(&bytes, OUTPUT_FRAME_MAX)? {
-            Invoke::Reply(reply) => reply,
-            Invoke::Capacity => return Err("full-capacity response rejected".into()),
-        };
+        let reply = exchange_hello(
+            &mut channel.teec,
+            role,
+            capacity_test,
+            "lsp-test-only-probe",
+        )
+        .map_err(|failure| failure.message)?;
+        validate_hello(&reply, role)?;
         require(reply.status == OK, "HELLO business rejection")?;
         (channel.input_frame_max, channel.upload_chunk_size) =
             negotiated_input_limits(&reply.metadata["result"])?;
@@ -521,6 +782,332 @@ mod tests {
         let mut wrong_next = reply();
         wrong_next.metadata["next_call_seq"] = json!("3");
         assert!(decode_reply(&wrong_next.encode_reply().unwrap(), &request, OK).is_err());
+    }
+
+    fn health_reply() -> Frame {
+        let mut frame = reply();
+        frame.metadata["result"] = json!({
+            "selected_version":{"major":1,"minor":0}, "role":"management",
+            "capabilities":{"features":["bulk_input_frames"]},
+            "limits":{"frame_input_max":61440,"max_concurrent_requests":4,"max_sessions":8}
+        });
+        frame
+    }
+
+    #[test]
+    fn health_hello_validates_version_role_state_identity_and_payload() {
+        assert!(validate_hello(&health_reply(), "management").is_ok());
+        for (field, value) in [
+            ("ta_epoch", json!("A".repeat(32))),
+            ("ta_epoch", json!("a".repeat(31))),
+            ("session_nonce", json!("g".repeat(32))),
+            ("session_nonce", json!(7)),
+            ("state", json!("NEW")),
+            ("next_call_seq", json!("3")),
+        ] {
+            let mut frame = health_reply();
+            frame.metadata[field] = value;
+            assert!(validate_hello(&frame, "management").is_err(), "{field}");
+        }
+        for version in [
+            json!({"major":2,"minor":0}),
+            json!({"major":1,"minor":1}),
+            json!({"major":1.0,"minor":0}),
+            Value::Null,
+        ] {
+            let mut frame = health_reply();
+            frame.metadata["result"]["selected_version"] = version;
+            assert!(validate_hello(&frame, "management").is_err());
+        }
+        let mut frame = health_reply();
+        frame.metadata["result"]["role"] = json!("request");
+        assert!(validate_hello(&frame, "management").is_err());
+        frame = health_reply();
+        frame.payload.push(1);
+        assert!(validate_hello(&frame, "management").is_err());
+        for mutate in [0, 1, 2] {
+            let mut frame = health_reply();
+            match mutate {
+                0 => frame.opcode = STATUS,
+                1 => frame.request_id = [1; 16],
+                _ => frame.call_seq = 2,
+            }
+            assert!(validate_hello(&frame, "management").is_err());
+        }
+    }
+
+    #[test]
+    fn detailed_open_errors_preserve_existing_api_messages() {
+        let init = OpenFailure {
+            stage: "initialize_context",
+            code: raw::TEEC_ERROR_COMMUNICATION,
+            origin: None,
+            manager_connected: false,
+        };
+        assert_eq!(init.message(), "initialize_context rc=0xffff000e");
+        let open = OpenFailure {
+            stage: "open_session",
+            code: raw::TEEC_ERROR_BUSY,
+            origin: Some(4),
+            manager_connected: true,
+        };
+        assert_eq!(open.message(), "open_session rc=0xffff000d origin=4");
+        let initial = HealthReport::open_failure(init);
+        assert!(!initial.manager_connected);
+        assert_eq!(initial.reason, "CONNECTION_FAILED");
+        let busy = HealthReport::open_failure(open);
+        assert!(busy.manager_connected);
+        assert_eq!(busy.ta_state, "busy");
+        assert_eq!(busy.reason, "TA_BUSY");
+        assert_eq!(busy.sdk_origin, Some(4));
+    }
+
+    struct HealthDrop(std::sync::Arc<std::sync::atomic::AtomicBool>);
+    impl Drop for HealthDrop {
+        fn drop(&mut self) {
+            self.0.store(true, std::sync::atomic::Ordering::SeqCst);
+        }
+    }
+
+    #[test]
+    fn health_returns_after_cleanup_for_success_and_all_hello_failures() {
+        use std::sync::{
+            Arc,
+            atomic::{AtomicBool, Ordering},
+        };
+        for mode in 0..6 {
+            let cleaned = Arc::new(AtomicBool::new(false));
+            let report = probe_session(
+                || Ok(HealthDrop(cleaned.clone())),
+                |_| match mode {
+                    1 => Err(InvokeFailure {
+                        message: "private diagnostic excluded".into(),
+                        code: Some(raw::TEEC_ERROR_COMMUNICATION),
+                        origin: Some(2),
+                    }),
+                    2 => Err(InvokeFailure {
+                        message: "busy".into(),
+                        code: Some(raw::TEEC_ERROR_BUSY),
+                        origin: Some(4),
+                    }),
+                    3 => Err("bad reply".to_owned().into()),
+                    4 => {
+                        let mut frame = health_reply();
+                        frame.payload.push(1);
+                        Ok(frame)
+                    }
+                    5 => {
+                        let mut frame = health_reply();
+                        frame.status = E_STATE;
+                        Ok(frame)
+                    }
+                    _ => Ok(health_reply()),
+                },
+            );
+            assert!(cleaned.load(Ordering::SeqCst));
+            assert!(report.sdk_cleanup_returned);
+            match mode {
+                0 => {
+                    assert_eq!(report.ta_state, "ready");
+                    assert!(report.manager_connected);
+                }
+                1 => {
+                    assert_eq!(report.reason, "CONNECTION_FAILED");
+                    assert!(!report.manager_connected);
+                }
+                2 => {
+                    assert_eq!(report.ta_state, "busy");
+                    assert!(report.manager_connected);
+                }
+                3 | 4 => assert_eq!(report.reason, "PROTOCOL_MISMATCH"),
+                _ => assert_eq!(report.reason, "HELLO_FAILED"),
+            }
+        }
+    }
+
+    #[test]
+    fn health_cleanup_block_keeps_probe_owned_until_actual_return() {
+        use std::{sync::mpsc, time::Duration};
+        struct BlockingDrop {
+            entered: mpsc::Sender<()>,
+            release: mpsc::Receiver<()>,
+        }
+        impl Drop for BlockingDrop {
+            fn drop(&mut self) {
+                self.entered.send(()).unwrap();
+                self.release.recv().unwrap();
+            }
+        }
+        let (entered_tx, entered_rx) = mpsc::channel();
+        let (release_tx, release_rx) = mpsc::channel();
+        let (result_tx, result_rx) = mpsc::channel();
+        let owner = std::thread::spawn(move || {
+            let report = probe_session(
+                || {
+                    Ok(BlockingDrop {
+                        entered: entered_tx,
+                        release: release_rx,
+                    })
+                },
+                |_| Ok(health_reply()),
+            );
+            result_tx.send(report).unwrap();
+        });
+        entered_rx.recv_timeout(Duration::from_secs(2)).unwrap();
+        assert!(matches!(
+            result_rx.try_recv(),
+            Err(mpsc::TryRecvError::Empty)
+        ));
+        release_tx.send(()).unwrap();
+        assert_eq!(
+            result_rx
+                .recv_timeout(Duration::from_secs(2))
+                .unwrap()
+                .ta_state,
+            "ready"
+        );
+        owner.join().unwrap();
+    }
+
+    #[test]
+    fn health_json_is_small_versioned_and_excludes_error_payloads() {
+        let report = probe_session(
+            || Ok(()),
+            |_| {
+                Err(InvokeFailure {
+                    message: "fixture-key-payload-must-remain-private".into(),
+                    code: Some(u32::MAX),
+                    origin: Some(u32::MAX),
+                })
+            },
+        );
+        let bytes = report.encode(std::time::Instant::now()).unwrap();
+        assert!(bytes.len() <= HEALTH_JSON_MAX);
+        let value: Value = serde_json::from_slice(&bytes).unwrap();
+        assert_eq!(value["schema_version"], 1);
+        assert_eq!(value["sdk_code"], u32::MAX);
+        assert_eq!(value["sdk_origin"], u32::MAX);
+        assert_eq!(value["sdk_cleanup_returned"], true);
+        assert!(!String::from_utf8(bytes).unwrap().contains("fixture-key"));
+    }
+
+    #[test]
+    fn health_invalid_endpoint_and_process_endpoint_conflict_are_local() {
+        let value: Value =
+            serde_json::from_slice(&probe_health_blocking(0, 10099).unwrap()).unwrap();
+        assert_eq!(value["reason"], "INVALID_ENDPOINT");
+        assert_eq!(value["manager_connected"], false);
+        assert!(cc_teec::configure_vsock_endpoint(3001, 10099).is_ok());
+        let value: Value =
+            serde_json::from_slice(&probe_health_blocking(3002, 10099).unwrap()).unwrap();
+        assert_eq!(value["reason"], "ENDPOINT_CONFLICT");
+        assert_eq!(value["stage"], "endpoint");
+        assert_eq!(value["sdk_cleanup_returned"], true);
+    }
+
+    #[test]
+    fn health_communication_origin_invalidates_later_connection_observation() {
+        assert!(communication_failed(raw::TEEC_ERROR_COMMUNICATION, None));
+        assert!(communication_failed(
+            raw::TEEC_ERROR_GENERIC,
+            Some(raw::TEEC_ORIGIN_COMMS)
+        ));
+        assert!(!communication_failed(
+            raw::TEEC_ERROR_BUSY,
+            Some(raw::TEEC_ORIGIN_TEE)
+        ));
+        let report = probe_session(
+            || Ok(()),
+            |_| {
+                Err(InvokeFailure {
+                    message: "communication origin".into(),
+                    code: Some(raw::TEEC_ERROR_GENERIC),
+                    origin: Some(raw::TEEC_ORIGIN_COMMS),
+                })
+            },
+        );
+        assert!(!report.manager_connected);
+        assert_eq!(report.reason, "CONNECTION_FAILED");
+    }
+
+    #[test]
+    fn health_remote_open_communication_failure_keeps_manager_connected() {
+        let code = raw::TEEC_ERROR_COMMUNICATION;
+        let origin = raw::TEEC_ORIGIN_TEE;
+        let failure = OpenFailure {
+            stage: "open_session",
+            code,
+            origin: Some(origin),
+            manager_connected: !communication_failed(code, Some(origin)),
+        };
+        assert_eq!(failure.message(), "open_session rc=0xffff000e origin=3");
+        let report = HealthReport::open_failure(failure);
+        assert!(report.manager_connected);
+        assert_eq!(report.ta_state, "unavailable");
+        assert_eq!(report.reason, "TA_OPEN_FAILED");
+        assert_eq!(report.stage, "open_session");
+    }
+
+    #[test]
+    fn health_remote_hello_communication_failure_keeps_manager_after_cleanup() {
+        use std::sync::{
+            Arc,
+            atomic::{AtomicBool, Ordering},
+        };
+        for origin in [
+            raw::TEEC_ORIGIN_API,
+            raw::TEEC_ORIGIN_TEE,
+            raw::TEEC_ORIGIN_TRUSTED_APP,
+        ] {
+            let cleaned = Arc::new(AtomicBool::new(false));
+            let report = probe_session(
+                || Ok(HealthDrop(cleaned.clone())),
+                |_| {
+                    Err(InvokeFailure {
+                        message: "remote communication failure".into(),
+                        code: Some(raw::TEEC_ERROR_COMMUNICATION),
+                        origin: Some(origin),
+                    })
+                },
+            );
+            assert!(cleaned.load(Ordering::SeqCst));
+            assert!(report.sdk_cleanup_returned);
+            assert!(report.manager_connected);
+            assert_eq!(report.ta_state, "unavailable");
+            assert_eq!(report.reason, "HELLO_FAILED");
+        }
+    }
+
+    #[test]
+    fn health_comms_origin_loses_manager_for_open_and_hello() {
+        let code = raw::TEEC_ERROR_COMMUNICATION;
+        let origin = Some(raw::TEEC_ORIGIN_COMMS);
+        let report = HealthReport::open_failure(OpenFailure {
+            stage: "open_session",
+            code,
+            origin,
+            manager_connected: !communication_failed(code, origin),
+        });
+        assert!(!report.manager_connected);
+        let report = probe_session(
+            || Ok(()),
+            |_| {
+                Err(InvokeFailure {
+                    message: "transport failure".into(),
+                    code: Some(code),
+                    origin,
+                })
+            },
+        );
+        assert!(!report.manager_connected);
+        assert_eq!(report.reason, "CONNECTION_FAILED");
+    }
+
+    #[test]
+    fn health_communication_without_recognized_origin_is_conservative() {
+        for origin in [None, Some(0), Some(u32::MAX)] {
+            assert!(communication_failed(raw::TEEC_ERROR_COMMUNICATION, origin));
+        }
     }
 }
 

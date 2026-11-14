@@ -36,6 +36,15 @@ public final class BackupTeeClient implements AutoCloseable {
 
     private BackupTeeClient() {}
 
+    /** Runs one credential-free manager/TA probe synchronously on its caller.
+     * Invoke on a dedicated background worker. The UTF-8 JSON result follows
+     * SDK CloseSession/FinalizeContext return, with no retained native handle.
+     * An observer timeout keeps this call and its worker owned until return.
+     */
+    public static byte[] probeHealthBlocking(int cid, int port) {
+        return nativeProbeHealth(cid, port);
+    }
+
     /** Receives HTTP head metadata and original body chunks synchronously on this
      * client's request executor. Returning from a callback allows the native pump
      * to proceed. A listener may retain its byte array. Callback exceptions fail
@@ -274,6 +283,7 @@ public final class BackupTeeClient implements AutoCloseable {
 
     @Override public void close() { closeAsync(); }
 
+    private static native byte[] nativeProbeHealth(int cid, int port);
     private static native long nativeOpen(int cid, int port);
     private static native byte[] nativeExchange(long handle, byte[] frame, int capacity);
     private static native byte[] nativeRawCall(long handle, byte[] config, byte[] body);

@@ -1,5 +1,5 @@
 //! GP storage adapter. Construct and use it on the dedicated storage thread.
-use crate::store::{Persistence, SNAPSHOT_MAX, validate_snapshot};
+use crate::store::{Persistence, SNAPSHOT_MAX, Vault, validate_snapshot};
 use rust_libutee::*;
 use sha2::{Digest, Sha256};
 use std::{ptr, thread::ThreadId};
@@ -134,11 +134,60 @@ pub struct GpPersistence {
     vault_id: [u8; 16],
     ready: bool,
 }
+
+#[derive(Clone, Copy)]
+enum OpenMode {
+    Existing,
+    Initialize,
+    EnsureInitialized,
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum VaultEnsureResult {
+    Initialized,
+    AlreadyReady,
+}
+
+impl VaultEnsureResult {
+    pub fn code(&self) -> &'static str {
+        match self {
+            Self::Initialized => "INITIALIZED",
+            Self::AlreadyReady => "ALREADY_READY",
+        }
+    }
+}
+
 impl GpPersistence {
     pub fn open(maintenance_initialize: bool) -> Result<Self, String> {
+        let mode = if maintenance_initialize {
+            OpenMode::Initialize
+        } else {
+            OpenMode::Existing
+        };
+        Self::open_mode(mode)
+    }
+
+    /// Prepare a new vault, resume a valid empty bootstrap, or validate an existing vault.
+    /// The exclusive anchor remains owned through validation and every bootstrap write.
+    pub fn ensure_initialized() -> Result<VaultEnsureResult, String> {
+        let persistence = Self::open_mode(OpenMode::EnsureInitialized)?;
+        let result = if persistence.ready {
+            let vault = Vault::from_storage(persistence).map_err(|error| error.to_string())?;
+            drop(vault);
+            VaultEnsureResult::AlreadyReady
+        } else {
+            let id = persistence.vault_id();
+            let vault = Vault::initialize(persistence, id).map_err(|error| error.to_string())?;
+            drop(vault);
+            VaultEnsureResult::Initialized
+        };
+        Ok(result)
+    }
+
+    fn open_mode(mode: OpenMode) -> Result<Self, String> {
         let anchor = match open(ANCHOR, 7)? {
             Some(value) => value,
-            None if maintenance_initialize => {
+            None if !matches!(mode, OpenMode::Existing) => {
                 if read_slot(SLOTS[0])?.is_some() || read_slot(SLOTS[1])?.is_some() {
                     return Err("Refusing initialization over existing slots".into());
                 }
@@ -151,10 +200,10 @@ impl GpPersistence {
             None => return Err("Vault not initialized".into()),
         };
         let (vault_id, ready) = parse_anchor(&read(&anchor, 64)?)?;
-        if ready && maintenance_initialize {
+        if ready && matches!(mode, OpenMode::Initialize) {
             return Err("READY vault cannot be initialized again".into());
         }
-        if !ready && !maintenance_initialize {
+        if !ready && matches!(mode, OpenMode::Existing) {
             return Err("Vault initialization incomplete".into());
         }
         Ok(Self {

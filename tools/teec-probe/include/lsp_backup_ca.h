@@ -15,6 +15,15 @@ extern "C" {
 /* Returns a nonzero handle, or zero on failure. Endpoint is process-immutable. */
 uint64_t lsp_native_open(uint32_t cid, uint32_t port);
 
+/* Runs one credential-free health probe synchronously on a dedicated worker.
+ * Output capacity is at least 2048. Returns UTF-8 JSON bytes or -1 on invalid
+ * output/encoding. Normal availability failures are represented inside JSON.
+ * The calling thread retains SDK ownership until Close/Finalize returns.
+ * No native handle remains after return. An observer timeout leaves the
+ * calling thread responsible for this call through actual return. */
+int64_t lsp_native_probe_health(uint32_t cid, uint32_t port,
+    uint8_t *output, size_t output_capacity);
+
 /* Output capacity must be at least 32776 bytes. capacity is GP p1 capacity.
  * Returns output bytes, or -1. Envelope is LE status u32 + LE length u32
  * followed by the LSP frame. Peer input limits come from HELLO. */

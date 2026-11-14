@@ -454,6 +454,37 @@ fn fail(error: String) {
 pub extern "C" fn lsp_native_last_error() -> *const c_char {
     LAST_ERROR.with(|slot| slot.borrow().as_ptr())
 }
+
+/// # Safety
+/// Output points to at least `capacity` writable bytes and remains valid until
+/// return. This synchronous call owns its SDK context through actual cleanup.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn lsp_native_probe_health(
+    cid: u32,
+    port: u32,
+    output: *mut u8,
+    capacity: usize,
+) -> i64 {
+    if output.is_null() || capacity < HEALTH_JSON_MAX {
+        fail("invalid health output buffer".into());
+        return -1;
+    }
+    match probe_health_blocking(cid, port) {
+        Ok(bytes) if bytes.len() <= capacity => {
+            unsafe { std::ptr::copy_nonoverlapping(bytes.as_ptr(), output, bytes.len()) };
+            bytes.len() as i64
+        }
+        Ok(_) => {
+            fail("health output exceeds capacity".into());
+            -1
+        }
+        Err(error) => {
+            fail(error);
+            -1
+        }
+    }
+}
+
 #[unsafe(no_mangle)]
 pub extern "C" fn lsp_native_open(cid: u32, port: u32) -> u64 {
     match open(cid, port) {
@@ -665,6 +696,25 @@ pub extern "C" fn lsp_native_released(handle: u64) -> i32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn health_ffi_checks_capacity_before_sdk_and_returns_raw_json() {
+        assert_eq!(
+            unsafe { lsp_native_probe_health(0, 0, std::ptr::null_mut(), HEALTH_JSON_MAX) },
+            -1
+        );
+        let mut bytes = [0u8; HEALTH_JSON_MAX];
+        assert_eq!(
+            unsafe { lsp_native_probe_health(0, 0, bytes.as_mut_ptr(), HEALTH_JSON_MAX - 1) },
+            -1
+        );
+        let length = unsafe { lsp_native_probe_health(0, 0, bytes.as_mut_ptr(), bytes.len()) };
+        assert!(length > 0 && length as usize <= HEALTH_JSON_MAX);
+        let report: Value = serde_json::from_slice(&bytes[..length as usize]).unwrap();
+        assert_eq!(report["schema_version"], 1);
+        assert_eq!(report["reason"], "INVALID_ENDPOINT");
+        assert_eq!(report["sdk_cleanup_returned"], true);
+    }
 
     fn test_state() -> Arc<State> {
         Arc::new(State {

@@ -93,6 +93,23 @@ impl TrustedApplication for SecretTa {
 }
 
 fn run() -> Result<(), String> {
+    let ensure_initialized = std::env::args().any(|arg| arg == "--ensure-vault-initialized");
+    if ensure_initialized {
+        if std::env::args().any(|arg| arg == "--initialize-vault") {
+            return Err("LSP_VAULT_ARGUMENTS_INVALID".into());
+        }
+        return std::thread::Builder::new()
+            .name("lsp-ensure-vault".into())
+            .spawn(|| {
+                let outcome = GpPersistence::ensure_initialized()?;
+                println!("LSP_VAULT_READY result={}", outcome.code());
+                Ok(())
+            })
+            .map_err(|_| "LSP_VAULT_ENSURE_FAILED".to_string())?
+            .join()
+            .map_err(|_| "LSP_VAULT_ENSURE_FAILED".to_string())?
+            .map_err(|_: String| "LSP_VAULT_ENSURE_FAILED".to_string());
+    }
     if std::env::args().any(|s| s == "--initialize-vault") {
         return std::thread::Builder::new()
             .name("lsp-initialize".into())

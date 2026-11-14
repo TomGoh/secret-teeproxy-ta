@@ -11,6 +11,8 @@ extern int32_t lsp_native_cancel(uint64_t handle);
 extern int32_t lsp_native_close(uint64_t handle);
 extern int32_t lsp_native_released(uint64_t handle);
 extern const char *lsp_native_last_error(void);
+extern int64_t lsp_native_probe_health(uint32_t cid, uint32_t port,
+    uint8_t *output, size_t capacity);
 typedef int32_t (*lsp_stream_callback)(void *user_data, uint32_t kind,
     const uint8_t *bytes, size_t length);
 extern int64_t lsp_native_raw_call(uint64_t handle, const uint8_t *config,
@@ -25,6 +27,29 @@ extern int64_t lsp_native_stream_call(uint64_t handle, const uint8_t *config,
 static void throw_error(JNIEnv *env, const char *message) {
     jclass error = (*env)->FindClass(env, "java/lang/IllegalStateException");
     if (error != NULL) (*env)->ThrowNew(env, error, message);
+}
+
+JNIEXPORT jbyteArray JNICALL
+Java_com_kylinos_systemai_tee_BackupTeeClient_nativeProbeHealth(
+    JNIEnv *env, jclass clazz, jint cid, jint port) {
+    (void)clazz;
+    uint8_t output[2048];
+    uint32_t probe_cid = cid > 2 ? (uint32_t)cid : 0;
+    uint32_t probe_port = port > 0 ? (uint32_t)port : 0;
+    int64_t count = lsp_native_probe_health(probe_cid, probe_port, output, sizeof(output));
+    if (count < 0) {
+        throw_error(env, lsp_native_last_error());
+        return NULL;
+    }
+    if (count > (int64_t)sizeof(output)) {
+        throw_error(env, "JNI health output exceeds capacity");
+        return NULL;
+    }
+    jbyteArray result = (*env)->NewByteArray(env, (jsize)count);
+    if (result != NULL) {
+        (*env)->SetByteArrayRegion(env, result, 0, (jsize)count, (jbyte *)output);
+    }
+    return result;
 }
 
 JNIEXPORT jlong JNICALL

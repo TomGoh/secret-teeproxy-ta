@@ -46,6 +46,18 @@ cargo build --locked --release --features tee --target aarch64-unknown-linux-mus
 
 生成的ELF需要使用xkernel兼容的tasign流程签名，安装文件名为 `<TA_UUID>.ta`。开发签名和部署的可复现记录位于总工作区 `artifacts/ta-implementation-20261113/`。Android原生库的构建与打包说明见备用CA文档。
 
+## 首次存储初始化
+
+在持久卷和 GP 存储视图就位后、服务 TA 取得存储锚点前，使用已签名的 TA 执行以下一次性入口。
+
+```sh
+/tee/ta/c86d23b9-e568-509e-a9b2-0ad40668caf5.ta --ensure-vault-initialized
+```
+
+新空存储与合法 BOOTSTRAP 初始化完成后输出 `LSP_VAULT_READY result=INITIALIZED`。已有 READY 状态经过完整校验后输出 `LSP_VAULT_READY result=ALREADY_READY`。成功退出码为0，损坏、异常对象或存储所有权冲突返回1。现有 `--initialize-vault` 入口用于明确的新存储初始化，遇到 READY 状态会拒绝。
+
+对应回归位于 `tests/gp_firstboot.rs`，直接执行 GP 适配器并注入对象API，覆盖部分初始化恢复、已有凭据读取、写入失败与锚点所有权冲突。2026-11-14的73项宿主机回归和首次空盘实际TEEC记录位于总工作区 `artifacts/iso-integration-20261114/ta-firstboot/` 与 `vm-preflight/`。
+
 ## 设备验证
 
 2026-11-13，`.18`与`.19`的独立protected调试VM已部署同一签名TA，保留现有kernel.bin。实际teec凭证管理、准入BUSY、上传偏移、取消、终态处理、DeepSeek官方 `/models` HTTP 200和Chat Completions SSE已通过。`.19`已通过保留instance/data的VM重启后凭证引用调用。普通测试APK的应用UID10121也已通过进程内JNI→teec→TA→DeepSeek的MODELS与SSE调用。
