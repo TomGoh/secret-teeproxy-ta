@@ -2,6 +2,20 @@
 
 当前四请求、三协议、bulk 输入与 APK 集成见 `docs/provider-expansion-v0.6.md`、`tools/teec-probe/README.md`、`CONTRACT.lock.json`，以及总工作区 `artifacts/provider-expansion-20261113/FINAL-REPORT.md`。实际 Java 类和 `tools/teec-probe/include/lsp_backup_ca.h` 描述交付 API。
 
+## 2026-11-14 空 Key 编辑与首装集成
+
+`src/wire.rs` 的请求前置校验按 `CREDENTIAL_PUT.reuse_existing_key` 决定 payload 要求。字段缺省或为 `false` 时，PUT 要求非空 Key payload。字段为 `true` 时，PUT 要求空 payload，随后由 `src/store.rs` 复用已有 live 凭证中的 Key。其他 JSON 类型均被拒绝。`tools/teec-probe` 通过 Cargo 的本仓库依赖复用该帧实现，交付时需配套升级 TA 与灵润 APK 内的 CA core。协议版本为 LSP/1.0，CA 导出接口为现有 24 个 C ABI 符号。
+
+存储层继续执行已有凭证、版本 CAS、幂等收据与生命周期校验。`deleted`、`expired` 引用为终态。Android 在释放后的物理 slot 导入新 Key 时生成新的逻辑 `credential_ref`，以 `expected_version="0"` 创建凭证。空 Key 编辑已有 live 凭证时沿用原引用，并在成功后递增版本。
+
+`wire`、`store` 与完整 App 帧路径的定向宿主机运行共通过 27 项测试，三个结果块分别为 10、16、1 项。旧帧校验搭配新增用例时先出现两项预期失败，分别覆盖空 payload 编解码和完整管理帧。记录位于总工作区 `artifacts/iso-firstboot-20261114/keyless-rebind/VALIDATION.json`、`baseline-host.log` 与 `fixed-host.log`。
+
+配套签名 TA 的 SHA-256 为 `b77ebad7110c22f5cdaca42ccf300133696e945085e2f1c85c825faf2ef583c7`。配套 APK v2 的 SHA-256 为 `1acd134f9375dc7f61f7af6e832773ec4b7b37782604d7082078bfb317180124`，内含 CA core `6bc2c651a545aa6103c1ccab025d4eed888640eca6091bec026ba0620e8688a1`。JNI 与 Java JAR 的二进制身份见配套 CA provenance。
+
+设备 `.19` 的现有提供商已在配套 App 与 RootFS v5 临时调试绑定下完成真实 UI 空 Key 保存，同一引用从版本 2 递增至 3。该检查的范围为 `artifacts/iso-firstboot-20261114/keyless-rebind/device19/KEYLESS-EDIT-ACCEPTANCE.json` 与 `DEPLOYMENT.json` 所记录的调试部署。新 ISO 的安装、首次启动及其余 CRUD 验收由上层交付记录继续跟踪。
+
+RootFS v4/v5 使用兼容当前 guest 内核的 ext4 legacy feature 集合，其中关闭 `orphan_file`。APK 的首装兼容入口为 application 级 `android:usesNonSdkApi="true"`，系统全局隐藏 API 策略沿用产品配置。对应首装与文件系统证据集中在总工作区 `artifacts/iso-firstboot-20261114/`。
+
 下方保留当日首版单路 MVP 的历史设备和产物检查点。当前运行 CID 由总工作区 `device18/runtime-endpoint.json`、`device19/runtime-endpoint.json` 提供。
 
 # TA实现与CA联调交接

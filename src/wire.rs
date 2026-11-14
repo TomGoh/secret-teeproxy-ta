@@ -480,9 +480,17 @@ pub fn validate_request_metadata(frame: &Frame) -> Result<(), WireError> {
             u32_field(m, name, false)?;
         }
     }
-    let permits_payload = matches!(frame.opcode, CREDENTIAL_PUT | BODY_CHUNK)
-        || (frame.opcode == STEP && m["input_kind"] == "tls_rx");
-    if permits_payload == frame.payload.is_empty() {
+    let requires_payload = match frame.opcode {
+        CREDENTIAL_PUT => match m.get("reuse_existing_key") {
+            None | Some(Value::Bool(false)) => true,
+            Some(Value::Bool(true)) => false,
+            Some(_) => return Err(invalid("key reuse type")),
+        },
+        BODY_CHUNK => true,
+        STEP => m["input_kind"] == "tls_rx",
+        _ => false,
+    };
+    if requires_payload == frame.payload.is_empty() {
         return Err(invalid("opcode payload requirement"));
     }
     match frame.opcode {
@@ -509,10 +517,6 @@ pub fn validate_request_metadata(frame: &Frame) -> Result<(), WireError> {
             }
         }
         CREDENTIAL_PUT => {
-            if let Some(reuse) = m.get("reuse_existing_key") {
-                let reuse = reuse.as_bool().ok_or_else(|| invalid("key reuse type"))?;
-                if reuse && !frame.payload.is_empty() { return Err(invalid("key reuse payload")); }
-            }
             if let Some(config) = m.get("provider_config") {
                 closed(config, &["provider_type", "base_url"], &[])?;
                 choice(
@@ -754,6 +758,78 @@ mod tests {
         assert!(validate_request_metadata(&frame).is_ok());
         frame.payload.push(b'\n');
         assert!(validate_request_metadata(&frame).is_err());
+    }
+
+    #[test]
+    fn credential_put_payload_rules_cover_keyless_rebind() {
+        let reuse_values = [
+            None,
+            Some(json!(false)),
+            Some(json!(true)),
+            Some(Value::Null),
+            Some(json!("true")),
+            Some(json!(1)),
+            Some(json!([])),
+            Some(json!({})),
+        ];
+        for reuse in reuse_values {
+            for has_payload in [false, true] {
+                let mut frame = Frame {
+                    opcode: CREDENTIAL_PUT,
+                    request_id: [0; 16],
+                    call_seq: 2,
+                    status: OK,
+                    metadata: json!({"ta_epoch":"0".repeat(32),"session_nonce":"1".repeat(32),
+                        "operation_id":"2".repeat(32),"credential_ref":"3".repeat(32),
+                        "namespace":"test","profile_id":"deepseek-prod-v1","expected_version":"1"}),
+                    payload: if has_payload { b"fake-test-key".to_vec() } else { Vec::new() },
+                };
+                if let Some(value) = &reuse {
+                    frame.metadata["reuse_existing_key"] = value.clone();
+                }
+                let expected = match &reuse {
+                    None | Some(Value::Bool(false)) => has_payload,
+                    Some(Value::Bool(true)) => !has_payload,
+                    _ => false,
+                };
+                assert_eq!(frame.encode_request().is_ok(), expected,
+                    "encode reuse={reuse:?} has_payload={has_payload}");
+                // Reply framing bypasses request validation so decode also sees invalid requests.
+                let mut bytes = frame.encode_reply().unwrap();
+                bytes[10..12].copy_from_slice(&0u16.to_le_bytes());
+                assert_eq!(Frame::decode_request(&bytes).is_ok(), expected,
+                    "decode reuse={reuse:?} has_payload={has_payload}");
+            }
+        }
+    }
+
+    #[test]
+    fn non_put_payload_rules_remain_strict() {
+        for (opcode, metadata, request_id, needs_payload) in [
+            (BODY_CHUNK, json!({"body_offset":"0"}), [3; 16], true),
+            (STEP, json!({"input_kind":"tls_rx","tls_rx_offset":"0", "net_tx_credit":1,"app_rx_credit":1}), [3; 16], true),
+            (STEP, json!({"input_kind":"none","tls_rx_offset":"0", "net_tx_credit":1,"app_rx_credit":1}), [3; 16], false),
+            (CREDENTIAL_QUERY, json!({"namespace":"test","credential_ref":"3".repeat(32)}), [0; 16], false),
+        ] {
+            for has_payload in [false, true] {
+                let mut metadata = metadata.clone();
+                metadata["ta_epoch"] = json!("0".repeat(32));
+                metadata["session_nonce"] = json!("1".repeat(32));
+                let frame = Frame {
+                    opcode,
+                    request_id,
+                    call_seq: 2,
+                    status: OK,
+                    metadata,
+                    payload: if has_payload { vec![1] } else { Vec::new() },
+                };
+                let expected = has_payload == needs_payload;
+                assert_eq!(frame.encode_request().is_ok(), expected, "encode opcode={opcode:#x}");
+                let mut bytes = frame.encode_reply().unwrap();
+                bytes[10..12].copy_from_slice(&0u16.to_le_bytes());
+                assert_eq!(Frame::decode_request(&bytes).is_ok(), expected, "decode opcode={opcode:#x}");
+            }
+        }
     }
 
     fn fixture_request(value: &Value) -> Frame {

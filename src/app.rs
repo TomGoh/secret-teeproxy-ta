@@ -1129,6 +1129,64 @@ mod tests {
     }
 
     #[test]
+    fn keyless_rebind_frame_preserves_key_and_business_guards() {
+        let app = app();
+        let context = app.open_session().unwrap();
+        let mut session = context.lock().unwrap();
+        let hello = exchange(&app, &mut session, HELLO, [0; 16], 1,
+            json!({"role":"management","supported_versions":[{"major":1,"minor":0}]}), &[]);
+        assert!(hello["result"]["capabilities"]["features"].as_array().unwrap()
+            .iter().any(|feature| feature == "credential_rebind"));
+        let put = json!({"namespace":"test","credential_ref":"1".repeat(32),
+            "operation_id":"2".repeat(32),"profile_id":"custom-provider-v1","expected_version":"0",
+            "provider_config":{"provider_type":"openai_compatible","base_url":"https://first.example/v1/"}});
+        let created = exchange(&app, &mut session, CREDENTIAL_PUT, [0; 16], 2,
+            put.clone(), b"fake-preserved-key");
+        assert!(created["error"].is_null(), "{created}");
+        let snapshot_meta = json!({"namespace":"test","credential_ref":"1".repeat(32),
+            "profile_id":"custom-provider-v1","expected_version":"1"});
+        let before = app.store.snapshot(snapshot_meta.clone()).unwrap();
+        let mut rebind = put;
+        rebind["operation_id"] = json!("3".repeat(32));
+        rebind["expected_version"] = json!("1");
+        rebind["reuse_existing_key"] = json!(true);
+        rebind["provider_config"]["base_url"] = json!("https://second.example/v2/");
+        let rebound = exchange(&app, &mut session, CREDENTIAL_PUT, [0; 16], 3,
+            rebind.clone(), &[]);
+        assert!(rebound["error"].is_null(), "{rebound}");
+        assert_eq!(rebound["result"]["version"], "2");
+        let mut snapshot_meta = snapshot_meta;
+        snapshot_meta["expected_version"] = json!("2");
+        let after = app.store.snapshot(snapshot_meta).unwrap();
+        assert!(Arc::ptr_eq(&before.key, &after.key));
+        assert_eq!(after.key.as_bytes(), b"fake-preserved-key");
+        assert_eq!(before.provider.host(), "first.example");
+        assert_eq!(after.provider.host(), "second.example");
+        let replayed = exchange(&app, &mut session, CREDENTIAL_PUT, [0; 16], 4,
+            rebind.clone(), &[]);
+        assert_eq!(replayed["result"]["replayed"], true);
+        let mut missing = rebind.clone();
+        missing["credential_ref"] = json!("4".repeat(32));
+        missing["operation_id"] = json!("5".repeat(32));
+        missing["expected_version"] = json!("0");
+        let rejected = exchange(&app, &mut session, CREDENTIAL_PUT, [0; 16], 5, missing, &[]);
+        assert_eq!(rejected["error"]["code"], "E_CREDENTIAL_NOT_FOUND");
+        rebind["operation_id"] = json!("6".repeat(32));
+        let stale = exchange(&app, &mut session, CREDENTIAL_PUT, [0; 16], 6,
+            rebind.clone(), &[]);
+        assert_eq!(stale["error"]["code"], "E_VERSION_CONFLICT");
+        let deleted = exchange(&app, &mut session, CREDENTIAL_DELETE, [0; 16], 7,
+            json!({"namespace":"test","credential_ref":"1".repeat(32),
+                "operation_id":"7".repeat(32),"expected_version":"2"}), &[]);
+        assert!(deleted["error"].is_null(), "{deleted}");
+        rebind["operation_id"] = json!("8".repeat(32));
+        rebind["expected_version"] = json!("3");
+        let revoked = exchange(&app, &mut session, CREDENTIAL_PUT, [0; 16], 8, rebind, &[]);
+        assert_eq!(revoked["error"]["code"], "E_CREDENTIAL_REVOKED");
+        app.close_session(&mut session);
+    }
+
+    #[test]
     fn provider_body_stream_defaults_preserve_nested_payload_options() {
         assert!(valid_request_body(br#"{"messages":[{"content":"opaque"}],"temperature":0.2,"stream":true}"#, relay::Operation::Responses, &json!("sse")));
         assert!(!valid_request_body(br#"{"stream":false}"#, relay::Operation::Messages, &json!("sse")));
