@@ -42,7 +42,7 @@ fn args() -> Result<Args> {
         match value.as_str() {
             "--cid"=>cid=Some(values.next().ok_or("missing CID")?.parse().map_err(|_|"invalid CID")?),
             "--port"=>port=values.next().ok_or("missing port")?.parse().map_err(|_|"invalid port")?,
-            "--probe"|"--test-suite"|"--parallel-suite"|"--fault-suite"|"--hold-upload"|"--hold-tls"|"--models"|"--provision-stdin"|"--chat"|"--chat-stream"|"--parallel-chat"|"--real-models"=>{
+            "--probe"|"--query"|"--test-suite"|"--parallel-suite"|"--fault-suite"|"--hold-upload"|"--hold-tls"|"--models"|"--provision-stdin"|"--chat"|"--chat-stream"|"--parallel-chat"|"--real-models"=>{
                 if value == "--chat-stream" { stream = true; }
                 if (mode == "--parallel-chat" && value == "--chat-stream") || (mode == "--chat-stream" && value == "--parallel-chat") {
                     mode = "--parallel-chat".into();
@@ -62,12 +62,15 @@ fn args() -> Result<Args> {
             "--base-url"=>base_url=Some(values.next().ok_or("missing base URL")?),
             "--operation"=>operation_kind=values.next().ok_or("missing operation")?,
             "--model"=>model=values.next().ok_or("missing model")?,
-            "--help"=>return Err("usage lsp-teec-probe --cid <actual-vm-cid> [--port 10099] [--probe|--test-suite|--parallel-suite|--fault-suite|--hold-upload|--hold-tls|--models|--chat|--chat-stream|--parallel-chat|--real-models] [--profile-id PROFILE] [--provider-type TYPE --base-url HTTPS_BASE for custom provisioning] [--operation CHAT|RESPONSES|MESSAGES] [--upstream-ip IP] [--network-chunk-size 1..16384]".into()),
+            "--help"=>return Err("usage lsp-teec-probe --cid <actual-vm-cid> [--port 10099] [--probe|--query|--test-suite|--parallel-suite|--fault-suite|--hold-upload|--hold-tls|--models|--chat|--chat-stream|--parallel-chat|--real-models] [--namespace NAMESPACE --credential-ref REF for --query] [--profile-id PROFILE] [--provider-type TYPE --base-url HTTPS_BASE for custom provisioning] [--operation CHAT|RESPONSES|MESSAGES] [--upstream-ip IP] [--network-chunk-size 1..16384]".into()),
             _=>return Err("unknown CLI argument".into()),
         }
     }
     let cid = cid.ok_or("--cid is required")?;
     require(cid > 2 && port > 0, "invalid VSOCK endpoint")?;
+    if mode == "--query" {
+        require(reference.is_some(), "--query requires --credential-ref")?;
+    }
     require(
         provider_type.is_some() == base_url.is_some(),
         "provider type and base URL must be supplied together",
@@ -114,6 +117,46 @@ fn run() -> Result<()> {
     match args.mode.as_str() {
         "--probe" => {
             let _channel = Channel::hello("management", true)?;
+        }
+        "--query" => {
+            let reference = args.reference.as_deref().ok_or("--query requires --credential-ref")?;
+            let mut management = Channel::hello("management", false)?;
+            let reply = management.call(
+                CREDENTIAL_QUERY,
+                json!({"namespace":args.namespace,"credential_ref":reference}),
+                &[],
+            )?;
+            let result = &reply.metadata["result"];
+            let mut public_result = json!({
+                "namespace":result["namespace"],
+                "credential_ref":result["credential_ref"],
+                "state":result["state"],
+                "version":result["version"],
+                "profile_id":result["profile_id"],
+                "temporary":result["temporary"],
+                "ttl_remaining_ms":result["ttl_remaining_ms"],
+                "replayed":result["replayed"],
+                "receipt":null,
+            });
+            if result["receipt"].is_object() {
+                public_result["receipt"] = json!({
+                    "operation_id":result["receipt"]["operation_id"],
+                    "operation":result["receipt"]["operation"],
+                    "committed_version":result["receipt"]["committed_version"],
+                });
+            }
+            if result["provider_config"].is_object() {
+                public_result["provider_config"] = json!({
+                    "provider_type":result["provider_config"]["provider_type"],
+                    "base_url":result["provider_config"]["base_url"],
+                });
+            }
+            let associated = result["namespace"] == args.namespace
+                && result["credential_ref"] == reference;
+            let ok = reply.status == OK && reply.payload.is_empty() && associated;
+            emit(json!({"check":"credential_query","ok":ok,"status":reply.status,
+                "payload_empty":reply.payload.is_empty(),"result":public_result}));
+            require(ok, "credential QUERY failed or reply association invalid")?;
         }
         "--test-suite" => suites::test_suite()?,
         "--parallel-suite" => suites::parallel_suite()?,
